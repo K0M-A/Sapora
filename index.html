@@ -3,185 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سبورة سابورة الذكية | Sapora Board</title>
+    <title>Sapora Pro | سبورة الثانوية العامة</title>
     <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
+        :root { --primary: #2c3e50; --accent: #3498db; --danger: #e74c3c; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; background: #f4f7f6; }
+        
+        /* واجهة الدخول */
+        #login-overlay {
+            position: fixed; inset: 0; background: var(--primary); z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
-        body { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ecf0f1;
+        .login-box { background: white; padding: 30px; border-radius: 15px; color: #333; text-align: center; }
+        input[type="password"] { padding: 10px; margin: 10px; border: 1px solid #ccc; border-radius: 5px; width: 200px; }
+
+        /* شريط الأدوات الجانبي */
+        #sidebar {
+            position: fixed; right: 10px; top: 50%; transform: translateY(-50%);
+            background: white; padding: 15px; border-radius: 20px;
+            display: flex; flex-direction: column; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 100;
         }
-        /* شريط الأدوات */
-        #toolbar { 
-            position: fixed; 
-            top: 10px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9); 
-            padding: 10px 20px; 
-            border-radius: 50px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-            z-index: 100; 
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            backdrop-filter: blur(5px);
+        .tool-btn { 
+            width: 45px; height: 45px; border-radius: 10px; border: none; 
+            cursor: pointer; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 20px;
         }
-        canvas { 
-            display: block; 
-            background: white; 
-            touch-action: none; /* لمنع اهتزاز الشاشة أثناء الرسم باللمس */
-        }
-        button { 
-            cursor: pointer; 
-            padding: 8px 15px; 
-            border: none;
-            border-radius: 20px;
-            background: var(--primary);
-            color: white;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover { background: var(--accent); }
-        #clearBtn { background: #e74c3c; }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #2ecc71;
-            border-radius: 50%;
-            display: inline-block;
+        .tool-btn.active { background: var(--accent); color: white; }
+        
+        canvas { display: block; background: white; touch-action: none; }
+        
+        /* المسطرة الوهمية */
+        #ruler-guide {
+            position: absolute; border: 2px dashed var(--accent); pointer-events: none; display: none;
         }
     </style>
 </head>
 <body>
 
-    <div id="toolbar">
-        <span class="status-dot"></span>
-        <span id="status">جاري الاتصال...</span>
-        <input type="color" id="colorPicker" value="#000000">
-        <button id="clearBtn">مسح الكل</button>
-        <small>السبورة التفاعلية v1.0</small>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>دخول المعلم (الأدمن)</h2>
+            <input type="password" id="adminPass" placeholder="أدخل كلمة السر">
+            <br>
+            <button onclick="checkAuth()" style="padding: 10px 20px; background: var(--accent); color:white; border:none; border-radius:5px;">دخول</button>
+            <p id="loginError" style="color:red; display:none;">كلمة سر خطأ!</p>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <input type="color" id="colorPicker" title="اللون">
+        <button class="tool-btn active" id="penBtn" title="قلم">✏️</button>
+        <button class="tool-btn" id="markerBtn" title="ماركر">🖍️</button>
+        <button class="tool-btn" id="eraserBtn" title="استيكة">🧽</button>
+        <button class="tool-btn" id="rulerBtn" title="مسطرة">📏</button>
+        <hr>
+        <button class="tool-btn" id="undoBtn" title="تراجع">↩️</button>
+        <button class="tool-btn" id="clearBtn" title="مسح الكل" style="background: #ffdada;">🗑️</button>
+        <hr>
+        <button class="tool-btn" onclick="document.getElementById('fileInput').click()" title="استيراد">📁</button>
+        <input type="file" id="fileInput" hidden accept="image/*">
     </div>
 
     <canvas id="whiteboard"></canvas>
+    <div id="ruler-guide"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // إعدادات مشروعك التي أرفقتها
         const firebaseConfig = {
             apiKey: "AIzaSyAVFNJhGIlOjyJgSGj9MqK4Xt89p_irSEQ",
             authDomain: "sapora-f738b.firebaseapp.com",
             projectId: "sapora-f738b",
             storageBucket: "sapora-f738b.firebasestorage.app",
             messagingSenderId: "6892834042",
-            appId: "1:6892834042:web:1993b52a61315ba5028d43",
-            measurementId: "G-RLNQ4F5HN9"
+            appId: "1:6892834042:web:1993b52a61315ba5028d43"
         };
 
-        // تشغيل Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const boardRef = ref(db, 'board_data/drawing');
+        const streamRef = ref(db, 'board_data/stream');
+        const controlRef = ref(db, 'board_data/control');
 
-        // إعداد السبورة
         const canvas = document.getElementById('whiteboard');
         const ctx = canvas.getContext('2d');
-        const colorPicker = document.getElementById('colorPicker');
-        const clearBtn = document.getElementById('clearBtn');
-        const statusText = document.getElementById('status');
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         let drawing = false;
-        let lastPos = { x: 0, y: 0 };
+        let mode = 'pen'; // pen, marker, eraser, ruler
+        let history = []; // للتراجع
+        let startX, startY;
 
-        // --- وظائف الرسم ---
-
-        function drawLine(x1, y1, x2, y2, color, remote = false) {
-            ctx.beginPath();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.lineCap = "round";
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.closePath();
-
-            // إذا كان المستخدم الحالي هو اللي بيرسم، نبعت الداتا لـ Firebase
-            if (!remote) {
-                const newDrawRef = ref(db, 'board_data/stream');
-                set(newDrawRef, { x1, y1, x2, y2, color, time: Date.now() });
+        // التحقق من الأدمن (كلمة السر الافتراضية: 123)
+        window.checkAuth = () => {
+            const pass = document.getElementById('adminPass').value;
+            if(pass === "123") {
+                document.getElementById('login-overlay').style.display = 'none';
+            } else {
+                document.getElementById('loginError').style.display = 'block';
             }
+        };
+
+        // تغيير الأدوات
+        document.getElementById('penBtn').onclick = () => setMode('pen');
+        document.getElementById('markerBtn').onclick = () => setMode('marker');
+        document.getElementById('eraserBtn').onclick = () => setMode('eraser');
+        document.getElementById('rulerBtn').onclick = () => setMode('ruler');
+
+        function setMode(m) {
+            mode = m;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(m + 'Btn').classList.add('active');
         }
 
-        // --- التعامل مع الماوس واللمس ---
-
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
-
-        const startDrawing = (e) => {
+        // منطق الرسم والتفاعل
+        canvas.addEventListener('pointerdown', (e) => {
             drawing = true;
-            lastPos = getPos(e);
-        };
+            startX = e.clientX;
+            startY = e.clientY;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            // حفظ حالة السبورة قبل التعديل (للتراجع)
+            history.push(canvas.toDataURL());
+        });
 
-        const moveDrawing = (e) => {
+        canvas.addEventListener('pointermove', (e) => {
             if (!drawing) return;
-            const currentPos = getPos(e);
-            drawLine(lastPos.x, lastPos.y, currentPos.x, currentPos.y, colorPicker.value);
-            lastPos = currentPos;
+            
+            const x = e.clientX;
+            const y = e.clientY;
+            const color = document.getElementById('colorPicker').value;
+
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            if (mode === 'pen') {
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 1;
+                ctx.strokeStyle = color;
+                drawAndEmit(x, y);
+            } else if (mode === 'marker') {
+                ctx.lineWidth = 20;
+                ctx.globalAlpha = 0.3; // تأثير الشفافية للماركر
+                ctx.strokeStyle = color;
+                drawAndEmit(x, y);
+            } else if (mode === 'eraser') {
+                ctx.lineWidth = 40;
+                ctx.globalAlpha = 1;
+                ctx.strokeStyle = "#ffffff";
+                drawAndEmit(x, y);
+            }
+        });
+
+        function drawAndEmit(x, y) {
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            set(streamRef, { 
+                x, y, 
+                color: ctx.strokeStyle, 
+                width: ctx.lineWidth, 
+                alpha: ctx.globalAlpha,
+                mode: mode,
+                time: Date.now() 
+            });
+        }
+
+        canvas.addEventListener('pointerup', () => { drawing = false; });
+
+        // استقبال البيانات من Firebase للمزامنة
+        onValue(streamRef, (snapshot) => {
+            const d = snapshot.val();
+            if(d && !drawing) { // الرسم فقط إذا كان الطالب يستقبل
+                ctx.lineWidth = d.width;
+                ctx.globalAlpha = d.alpha;
+                ctx.strokeStyle = d.color;
+                ctx.lineTo(d.x, d.y);
+                ctx.stroke();
+            }
+        });
+
+        // زر التراجع (Undo)
+        document.getElementById('undoBtn').onclick = () => {
+            if (history.length > 0) {
+                let prevImg = new Image();
+                prevImg.src = history.pop();
+                prevImg.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(prevImg, 0, 0);
+                };
+            }
         };
 
-        const stopDrawing = () => { drawing = false; };
-
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', moveDrawing);
-        canvas.addEventListener('mouseup', stopDrawing);
-
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', moveDrawing);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        // --- الاستقبال من Firebase (المزامنة اللحظية) ---
-
-        const streamRef = ref(db, 'board_data/stream');
-        onValue(streamRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                drawLine(data.x1, data.y1, data.x2, data.y2, data.color, true);
-            }
-        });
-
-        // مسح السبورة
-        clearBtn.addEventListener('click', () => {
-            set(ref(db, 'board_data/control'), { action: 'clear', time: Date.now() });
-        });
-
-        const controlRef = ref(db, 'board_data/control');
-        onValue(controlRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.action === 'clear') {
+        // مسح الكل
+        document.getElementById('clearBtn').onclick = () => {
+            if(confirm("هل تريد مسح السبورة بالكامل؟")) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                set(controlRef, { action: 'clear', time: Date.now() });
             }
-            statusText.innerText = "متصل بالصف";
-        });
+        };
 
-        // تعديل حجم الشاشة عند تدوير الموبايل أو التابلت
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        // استيراد صور وملفات
+        document.getElementById('fileInput').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => ctx.drawImage(img, 50, 50, 400, 300);
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
 
     </script>
 </body>

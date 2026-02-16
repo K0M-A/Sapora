@@ -3,78 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sapora Rocket Pro | سابورة ذكية مطورة</title>
+    <title>Sapora Rocket Turbo | سابورة الصاروخ الذكية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #1a73e8; --bg: #f8f9fa; --panel: rgba(255, 255, 255, 0.9); }
-        body { margin: 0; overflow: hidden; font-family: 'Cairo', sans-serif; background: #e0e0e0; touch-action: none; }
+        :root { --main: #007bff; --bg: #121212; --panel: rgba(255, 255, 255, 0.95); }
+        body { margin: 0; overflow: hidden; font-family: 'Cairo', sans-serif; background: #222; touch-action: none; }
         
         /* شاشة الدخول */
         #auth-screen {
-            position: fixed; inset: 0; background: radial-gradient(circle, #1a237e, #000); 
+            position: fixed; inset: 0; background: #000; 
             z-index: 2000; display: flex; align-items: center; justify-content: center; color: white;
         }
-        .card { background: white; padding: 30px; border-radius: 20px; color: #333; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 400px; }
-        .card button { padding: 12px; border: none; border-radius: 10px; background: var(--main); color: white; cursor: pointer; font-weight: bold; width: 100%; margin: 5px 0; }
+        .card { background: white; padding: 40px; border-radius: 25px; color: #333; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 85%; max-width: 350px; }
+        .card h2 { margin-bottom: 20px; color: var(--main); }
+        .card button { padding: 15px; border: none; border-radius: 12px; background: var(--main); color: white; cursor: pointer; font-weight: bold; width: 100%; margin: 8px 0; font-size: 16px; transition: 0.3s; }
+        .card button:hover { transform: scale(1.02); background: #0056b3; }
 
-        /* شريط الأدوات العلوي */
-        #toolbar {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: var(--panel); backdrop-filter: blur(10px); padding: 8px 15px; 
-            border-radius: 15px; display: none; gap: 8px; flex-wrap: wrap;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 100; justify-content: center;
+        /* أشرطة الأدوات */
+        #toolbar, #shape-tools {
+            position: fixed; background: var(--panel); backdrop-filter: blur(15px); 
+            border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); z-index: 100; display: none; padding: 10px;
         }
+        #toolbar { top: 15px; left: 50%; transform: translateX(-50%); gap: 10px; align-items: center; }
+        #shape-tools { right: 15px; top: 50%; transform: translateY(-50%); flex-direction: column; gap: 12px; }
 
-        /* شريط الأدوات الجانبي (الهندسة) */
-        #shape-tools {
-            position: fixed; right: 10px; top: 50%; transform: translateY(-50%);
-            display: none; flex-direction: column; gap: 10px; background: var(--panel);
-            padding: 10px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+        .tool { width: 48px; height: 48px; border-radius: 12px; border: 1px solid #eee; cursor: pointer; background: white; font-size: 22px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .tool:hover { background: #f8f9fa; transform: translateY(-2px); }
+        .tool.active { background: var(--main); color: white; border-color: var(--main); box-shadow: 0 4px 12px rgba(0,123,255,0.4); }
 
-        .tool { width: 45px; height: 45px; border-radius: 10px; border: 1px solid #ddd; cursor: pointer; background: white; font-size: 20px; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .tool:hover { background: #f0f0f0; }
-        .tool.active { background: var(--main); color: white; border-color: var(--main); }
-
-        canvas { display: block; background: white; cursor: crosshair; }
+        canvas { display: block; background: #fff; cursor: crosshair; }
         
-        #status-tag { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 10px; font-size: 12px; z-index: 101; }
-        
-        .zoom-info { position: fixed; bottom: 20px; right: 20px; background: white; padding: 5px 10px; border-radius: 8px; font-size: 12px; border: 1px solid #ccc; }
+        #status-tag { position: fixed; top: 15px; right: 15px; background: rgba(0,0,0,0.8); color: #00ff00; padding: 8px 15px; border-radius: 30px; font-size: 13px; z-index: 101; font-weight: bold; border: 1px solid #333; }
+        .zoom-info { position: fixed; bottom: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 8px 15px; border-radius: 12px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="card" id="choice-card">
-            <h2>🚀 سابورة الصاروخية Pro</h2>
-            <button onclick="beStudent()" style="background:#4caf50;">دخول كطالب</button>
-            <button onclick="showAdminLogin()">دخول كمعلم</button>
+            <h2>🚀 الصاروخ Turbo</h2>
+            <button onclick="beStudent()" style="background:#28a745;">دخول الطالب (متابعة)</button>
+            <button onclick="showAdminLogin()">دخول المعلم (تحكم)</button>
         </div>
         <div class="card" id="login-card" style="display:none;">
-            <h2>قفل المعلم</h2>
-            <input type="password" id="pass" placeholder="كلمة السر (123)" style="width:90%; padding:10px; margin-bottom:10px;">
-            <button onclick="verifyAdmin()">فتح التحكم</button>
+            <h2>دخول آمن</h2>
+            <input type="password" id="pass" placeholder="كلمة المرور" style="width:90%; padding:15px; margin-bottom:15px; border-radius:10px; border:2px solid #ddd; text-align:center; font-size:18px;">
+            <button onclick="verifyAdmin()">فتح اللوحة</button>
         </div>
     </div>
 
-    <div id="status-tag">📡 وضع المشاهدة</div>
+    <div id="status-tag">📡 وضع المتابعة المباشرة</div>
 
     <div id="toolbar">
-        <input type="color" id="color" value="#000000" title="لون الخط">
-        <button class="tool active" onclick="setMode('pen', this)" title="قلم">✏️</button>
-        <button class="tool" onclick="setMode('marker', this)" title="فسفوري">🖍️</button>
-        <button class="tool" onclick="setMode('eraser', this)" title="ممحاة">🧽</button>
-        <button class="tool" onclick="setMode('move', this)" title="تحريك وزووم">🖐️</button>
-        <div style="width:1px; background:#ccc;"></div>
-        <button class="tool" onclick="undo()" title="تراجع">↩️</button>
-        <button class="tool" onclick="clearBoard()" style="color:red" title="مسح الكل">🗑️</button>
+        <input type="color" id="color" value="#000000" style="width:40px; height:40px; border:none; cursor:pointer; background:none;">
+        <button class="tool active" onclick="setMode('pen', this)">✏️</button>
+        <button class="tool" onclick="setMode('marker', this)">🖍️</button>
+        <button class="tool" onclick="setMode('eraser', this)">🧽</button>
+        <button class="tool" onclick="setMode('move', this)">🖐️</button>
+        <div style="width:2px; height:30px; background:#ddd; margin:0 5px;"></div>
+        <button class="tool" onclick="undo()">↩️</button>
+        <button class="tool" onclick="clearBoard()" style="color:#dc3545">🗑️</button>
     </div>
 
     <div id="shape-tools">
-        <button class="tool" onclick="setMode('line', this)" title="خط مستقيم">📏</button>
-        <button class="tool" onclick="setMode('rect', this)" title="مربع">🟦</button>
-        <button class="tool" onclick="setMode('circle', this)" title="دائرة">⭕</button>
+        <button class="tool" onclick="setMode('line', this)">📏</button>
+        <button class="tool" onclick="setMode('rect', this)">🟦</button>
+        <button class="tool" onclick="setMode('circle', this)">⭕</button>
     </div>
 
     <div class="zoom-info" id="zoom-val">التكبير: 100%</div>
@@ -83,7 +77,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, onChildAdded, remove, limitToLast, query, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // كلمة السر المخفية (تستطيع تغييرها هنا)
+        const SECRET_PASS = "123"; 
 
         const firebaseConfig = {
             apiKey: "AIzaSyAVFNJhGIlOjyJgSGj9MqK4Xt89p_irSEQ",
@@ -96,7 +93,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const drawRef = ref(db, 'drawing_v2');
+        const drawRef = ref(db, 'live_board');
+        const camRef = ref(db, 'camera_view');
 
         const canvas = document.getElementById('board');
         const ctx = canvas.getContext('2d');
@@ -105,8 +103,6 @@
         let isDrawing = false;
         let currentMode = 'pen';
         let startPos = { x: 0, y: 0 };
-        
-        // إعدادات الكاميرا (التحريك والزووم)
         let camera = { x: 0, y: 0, zoom: 1 };
         let drawings = [];
 
@@ -118,90 +114,87 @@
         window.onresize = resize;
         resize();
 
-        // تحويل إحداثيات الشاشة إلى إحداثيات السبورة
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
             return {
-                x: (e.clientX - rect.left - camera.x) / camera.zoom,
-                y: (e.clientY - rect.top - camera.y) / camera.zoom
+                x: (clientX - rect.left - camera.x) / camera.zoom,
+                y: (clientY - rect.top - camera.y) / camera.zoom
             };
         }
 
-        window.beStudent = () => {
-            document.getElementById('auth-screen').style.display = 'none';
-        };
-
+        window.beStudent = () => document.getElementById('auth-screen').style.display = 'none';
         window.showAdminLogin = () => {
             document.getElementById('choice-card').style.display = 'none';
             document.getElementById('login-card').style.display = 'block';
         };
 
         window.verifyAdmin = () => {
-            if(document.getElementById('pass').value === "123") {
+            if(document.getElementById('pass').value === SECRET_PASS) {
                 isAdmin = true;
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('toolbar').style.display = 'flex';
                 document.getElementById('shape-tools').style.display = 'flex';
-                document.getElementById('status-tag').innerText = "👨‍🏫 وضع المعلم (بث مباشر)";
-                document.getElementById('status-tag').style.background = "#d32f2f";
-            } else { alert("كلمة السر خاطئة!"); }
+                document.getElementById('status-tag').innerText = "👨‍🏫 بث مباشر للمعلم";
+                document.getElementById('status-tag').style.color = "#ff4757";
+            } else { alert("عذراً، كلمة المرور غير صحيحة!"); }
         };
 
-        // الرسم
+        // رسم كل شيء
         function redrawAll() {
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.translate(camera.x, camera.y);
             ctx.scale(camera.zoom, camera.zoom);
 
-            drawings.forEach(draw => {
-                renderElement(draw);
+            drawings.forEach(item => {
+                ctx.beginPath();
+                ctx.globalAlpha = item.opacity || 1;
+                ctx.strokeStyle = item.color;
+                ctx.lineWidth = item.width;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                if (['pen', 'marker', 'eraser', 'line'].includes(item.type)) {
+                    ctx.moveTo(item.x1, item.y1);
+                    ctx.lineTo(item.x2, item.y2);
+                } else if (item.type === 'rect') {
+                    ctx.strokeRect(item.x1, item.y1, item.x2 - item.x1, item.y2 - item.y1);
+                } else if (item.type === 'circle') {
+                    let r = Math.sqrt(Math.pow(item.x2 - item.x1, 2) + Math.pow(item.y2 - item.y1, 2));
+                    ctx.arc(item.x1, item.y1, r, 0, Math.PI * 2);
+                }
+                ctx.stroke();
             });
             document.getElementById('zoom-val').innerText = `التكبير: ${Math.round(camera.zoom * 100)}%`;
         }
 
-        function renderElement(draw) {
-            ctx.beginPath();
-            ctx.globalAlpha = draw.opacity || 1;
-            ctx.strokeStyle = draw.color;
-            ctx.lineWidth = draw.width;
-            ctx.lineCap = 'round';
-
-            if (draw.type === 'pen' || draw.type === 'marker' || draw.type === 'eraser') {
-                ctx.moveTo(draw.x1, draw.y1);
-                ctx.lineTo(draw.x2, draw.y2);
-            } else if (draw.type === 'rect') {
-                ctx.strokeRect(draw.x1, draw.y1, draw.x2 - draw.x1, draw.y2 - draw.y1);
-            } else if (draw.type === 'circle') {
-                let r = Math.sqrt(Math.pow(draw.x2 - draw.x1, 2) + Math.pow(draw.y2 - draw.y1, 2));
-                ctx.arc(draw.x1, draw.y1, r, 0, Math.PI * 2);
-            } else if (draw.type === 'line') {
-                ctx.moveTo(draw.x1, draw.y1);
-                ctx.lineTo(draw.x2, draw.y2);
-            }
-            ctx.stroke();
-            ctx.closePath();
+        // مزامنة الكاميرا (المعلم يرسل والطالب يستقبل)
+        if (!isAdmin) {
+            onValue(camRef, (snap) => {
+                if (snap.exists()) {
+                    camera = snap.val();
+                    redrawAll();
+                }
+            });
         }
 
-        // التعامل مع Firebase
-        onChildAdded(drawRef, (snapshot) => {
+        // استقبال بيانات الرسم
+        onValue(drawRef, (snapshot) => {
             const data = snapshot.val();
-            if (data.type === 'clear') {
-                drawings = [];
-            } else {
-                drawings.push(data);
-            }
+            drawings = data ? Object.values(data) : [];
             redrawAll();
         });
 
-        // أحداث الماوس
+        // أحداث الرسم والتحريك
         canvas.addEventListener('pointerdown', (e) => {
             if(!isAdmin && currentMode !== 'move') return;
             isDrawing = true;
-            startPos = getMousePos(e);
-            
             if(currentMode === 'move') {
                 startPos = { x: e.clientX - camera.x, y: e.clientY - camera.y };
+            } else {
+                startPos = getMousePos(e);
             }
         });
 
@@ -211,32 +204,29 @@
             if(currentMode === 'move') {
                 camera.x = e.clientX - startPos.x;
                 camera.y = e.clientY - startPos.y;
+                if(isAdmin) set(camRef, camera); // مزامنة حركة الشاشة للطلاب
                 redrawAll();
                 return;
             }
 
             if(!isAdmin) return;
-
             const currentPos = getMousePos(e);
             const color = currentMode === 'eraser' ? '#ffffff' : document.getElementById('color').value;
-            const width = currentMode === 'pen' ? 3 : (currentMode === 'marker' ? 15 : 30);
-            const opacity = currentMode === 'marker' ? 0.3 : 1;
-
+            const width = currentMode === 'pen' ? 3 : (currentMode === 'marker' ? 20 : 40);
+            
             if(['pen', 'marker', 'eraser'].includes(currentMode)) {
-                const drawData = {
+                push(drawRef, {
                     type: currentMode,
                     x1: startPos.x, y1: startPos.y,
                     x2: currentPos.x, y2: currentPos.y,
-                    color, width, opacity
-                };
-                push(drawRef, drawData);
+                    color, width, opacity: currentMode === 'marker' ? 0.3 : 1
+                });
                 startPos = currentPos;
             }
         });
 
         canvas.addEventListener('pointerup', (e) => {
             if(!isDrawing || !isAdmin) { isDrawing = false; return; }
-            
             const endPos = getMousePos(e);
             if(['rect', 'circle', 'line'].includes(currentMode)) {
                 push(drawRef, {
@@ -244,42 +234,42 @@
                     x1: startPos.x, y1: startPos.y,
                     x2: endPos.x, y2: endPos.y,
                     color: document.getElementById('color').value,
-                    width: 3, opacity: 1
+                    width: 3
                 });
             }
             isDrawing = false;
         });
 
-        // زووم باستخدام البكرة
+        // زووم المعلم يظهر للطلاب
         canvas.addEventListener('wheel', (e) => {
+            if(!isAdmin) return;
             e.preventDefault();
-            const scaleAmount = -e.deltaY * 0.001;
-            camera.zoom = Math.min(Math.max(0.1, camera.zoom + scaleAmount), 5);
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            camera.zoom = Math.min(Math.max(0.2, camera.zoom * delta), 5);
+            set(camRef, camera);
             redrawAll();
         }, { passive: false });
 
-        // الأدوات
         window.setMode = (m, btn) => {
             currentMode = m;
             document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
-            canvas.style.cursor = m === 'move' ? 'grab' : 'crosshair';
         };
 
         window.undo = async () => {
-            // التراجع في Firebase يتطلب حذف آخر عقدة
-            // للتبسيط في هذا المثال سنقوم بإرسال طلب مسح آخر خطوة
-            alert("ميزة التراجع الفردي تتطلب إعدادات Firebase متقدمة، تم مسح آخر حركة محلياً");
-            drawings.pop();
-            redrawAll();
+            const q = query(drawRef, limitToLast(1));
+            const snap = await get(q);
+            if (snap.exists()) {
+                const lastKey = Object.keys(snap.val())[0];
+                remove(ref(db, `live_board/${lastKey}`));
+            }
         };
 
         window.clearBoard = () => {
-            if(!confirm("سيتم مسح السبورة نهائياً لدى الجميع؟")) return;
-            remove(drawRef);
-            push(drawRef, { type: 'clear' });
-            drawings = [];
-            redrawAll();
+            if(confirm("مسح السبورة بالكامل؟")) {
+                remove(drawRef);
+                set(camRef, {x:0, y:0, zoom:1});
+            }
         };
 
     </script>

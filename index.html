@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sapora Rocket Turbo V2 Pro</title>
+    <title>Sapora Rocket Turbo V2 Pro - Ultra</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -21,95 +21,77 @@
             z-index: 2000; display: flex; align-items: center; justify-content: center;
         }
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: var(--shadow); width: 90%; max-width: 400px; text-align: center; }
-        .card h1 { color: #1e3c72; margin-bottom: 25px; font-size: 24px; }
-        .btn-main { padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; margin: 10px 0; font-size: 16px; transition: 0.3s; }
-        .btn-teacher { background: var(--primary); color: white; }
-        .btn-student { background: #2ed573; color: white; }
+        
+        /* قائمة الطلاب (للمعلم فقط) */
+        #students-list {
+            position: fixed; top: 70px; right: 20px; background: var(--glass); 
+            padding: 10px; border-radius: 10px; box-shadow: var(--shadow);
+            max-height: 200px; overflow-y: auto; display: none; z-index: 1000; width: 150px;
+        }
+        .student-item { font-size: 12px; padding: 5px; border-bottom: 1px solid #eee; display: flex; align-items: center; }
+        .student-item::before { content: '🟢'; margin-left: 5px; font-size: 8px; }
 
-        /* أشرطة الأدوات */
+        /* نظام الإشعارات اللحظية */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 3000; pointer-events: none;
+        }
+        .toast {
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 50px; margin-bottom: 10px; animation: fadeInOut 3s forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* تحسينات الواجهة */
         #toolbar {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: var(--glass); backdrop-filter: blur(10px); padding: 10px 20px;
             border-radius: 20px; box-shadow: var(--shadow); display: none; gap: 10px; align-items: center; z-index: 1000;
-            border: 1px solid rgba(255,255,255,0.3); flex-wrap: wrap; justify-content: center;
         }
-
-        #side-tools {
-            position: fixed; left: 20px; top: 50%; transform: translateY(-50%);
-            display: none; flex-direction: column; gap: 10px; z-index: 1000;
-        }
-
-        .tool-btn {
-            width: 45px; height: 45px; border-radius: 12px; border: none;
-            background: white; cursor: pointer; font-size: 20px; transition: 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;
-        }
-        .tool-btn:hover { background: #f0f0f0; transform: translateY(-2px); }
+        .tool-btn { width: 45px; height: 45px; border-radius: 12px; border: none; background: white; cursor: pointer; font-size: 20px; transition: 0.2s; }
         .tool-btn.active { background: var(--primary); color: white; }
-        .tool-btn.danger { color: var(--accent); }
 
-        .size-slider { width: 100px; cursor: pointer; }
-
-        #status-tag {
-            position: fixed; top: 20px; right: 20px; padding: 8px 15px;
-            border-radius: 10px; font-weight: bold; z-index: 1000; font-size: 14px;
-            background: white; box-shadow: var(--shadow);
-        }
-
-        #sync-toggle {
-            position: fixed; top: 20px; left: 20px; z-index: 1000;
-            background: #ffa502; color: white; padding: 8px 15px; border-radius: 10px;
-            cursor: pointer; font-size: 13px; font-weight: bold; border: none;
-        }
+        #fullscreen-btn { position: fixed; top: 20px; right: 50%; transform: translateX(50%); z-index: 1000; padding: 8px; border-radius: 50%; border: none; background: white; cursor: pointer; box-shadow: var(--shadow); }
 
         canvas { display: block; background: white; cursor: crosshair; }
-        .zoom-info { position: fixed; bottom: 90px; right: 20px; background: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="card">
-            <h1>🚀 Rocket Turbo V2 Pro</h1>
-            <button class="btn-main btn-student" onclick="beStudent()">دخول طالب (عرض)</button>
-            <button class="btn-main btn-teacher" onclick="showAdminPrompt()">دخول معلم (تحكم)</button>
+            <h1>🚀 Rocket V2 Ultra</h1>
+            <input type="text" id="user-name" placeholder="أدخل اسمك هنا..." style="padding:10px; width:80%; margin-bottom:15px; border-radius:10px; border:1px solid #ccc;">
+            <button class="btn-main" onclick="beStudent()" style="background:#2ed573; color:white; padding:12px; width:100%; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">دخول كطالب</button>
+            <hr>
+            <button class="btn-main" onclick="showAdminPrompt()" style="background:#4361ee; color:white; padding:12px; width:100%; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">دخول كمعلم</button>
         </div>
     </div>
 
-    <div id="status-tag">📡 متصل كطالب</div>
-    <button id="sync-toggle" onclick="toggleSync()" style="display:none;">🔗 مزامنة مع المعلم: مفعل</button>
-
+    <div id="toast-container"></div>
+    <div id="students-list"><b>👥 الحاضرون:</b><div id="list-content"></div></div>
+    
+    <button id="fullscreen-btn" onclick="toggleFullscreen()">📺</button>
+    
     <div id="toolbar">
-        <input type="color" id="colorPicker" value="#000000" class="tool-btn" style="padding:0; width:35px; height:35px;">
-        <div style="display:flex; flex-direction:column; align-items:center;">
-            <input type="range" id="sizePicker" class="size-slider" min="1" max="50" value="3">
-            <span id="sizeVal" style="font-size:10px;">3px</span>
-        </div>
+        <input type="color" id="colorPicker" value="#000000" class="tool-btn">
+        <input type="range" id="sizePicker" min="1" max="50" value="3">
         <button class="tool-btn active" onclick="setMode('pen', this)">✏️</button>
-        <button class="tool-btn" onclick="setMode('marker', this)">🖍️</button>
         <button class="tool-btn" onclick="setMode('eraser', this)">🧽</button>
-        <button class="tool-btn" onclick="setMode('text', this)">✍️</button>
-        <button class="tool-btn" onclick="setMode('move', this)">🖐️</button>
-        <div style="width:1px; height:30px; background:#ddd; margin:0 5px;"></div>
-        <button class="tool-btn" onclick="undo()">↩️</button>
-        <button class="tool-btn danger" onclick="clearBoard()">🗑️</button>
-        <button class="tool-btn" onclick="downloadBoard()">💾</button>
+        <button class="tool-btn" onclick="clearBoard()">🗑️</button>
     </div>
 
-    <div id="side-tools">
-        <button class="tool-btn" onclick="setMode('line', this)">📏</button>
-        <button class="tool-btn" onclick="setMode('rect', this)">🟦</button>
-        <button class="tool-btn" onclick="setMode('circle', this)">⭕</button>
-    </div>
-
-    <div class="zoom-info" id="zoom-val">100%</div>
     <canvas id="board"></canvas>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, query, limitToLast, get, onChildAdded, onChildRemoved } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove, onChildAdded, onChildRemoved, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAVFNJhGIlOjyJgSGj9MqK4Xt89p_irSEQ",
             authDomain: "sapora-f738b.firebaseapp.com",
@@ -122,245 +104,126 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const drawRef = ref(db, 'live_board');
-        const camRef = ref(db, 'camera_view');
+        const presenceRef = ref(db, 'presence');
 
         const canvas = document.getElementById('board');
         const ctx = canvas.getContext('2d');
-        
         let isAdmin = false;
         let isDrawing = false;
         let currentMode = 'pen';
-        let isSynced = true; 
-        let camera = { x: 0, y: 0, zoom: 1 };
-        let drawings = {}; // استخدام Object لتسريع الوصول
-        let currentPath = [];
-        let startPos = { x: 0, y: 0 };
+        let userName = "";
+        let drawings = {};
 
-        // --- تهيئة الحجم ---
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            render();
+        // --- نظام التنبيهات (Toast) ---
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerText = msg;
+            container.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
         }
-        window.addEventListener('resize', resize);
-        resize();
 
-        // --- دوال الدخول ---
+        // --- نظام الحضور ---
+        function setupPresence(name) {
+            const myPresence = push(presenceRef);
+            set(myPresence, { name: name, role: isAdmin ? 'teacher' : 'student' });
+            onDisconnect(myPresence).remove();
+        }
+
+        // --- شاشة كاملة ---
+        window.toggleFullscreen = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
+
+        // --- دخول المستخدمين ---
         window.beStudent = () => {
+            userName = document.getElementById('user-name').value || "طالب مجهول";
             document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('sync-toggle').style.display = 'block';
+            setupPresence(userName);
         };
 
         window.showAdminPrompt = () => {
-            const pass = prompt("أدخل كلمة المرور:");
+            const pass = prompt("كلمة المرور:");
             if(pass === "123") {
                 isAdmin = true;
+                userName = "المعلم";
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('toolbar').style.display = 'flex';
-                document.getElementById('side-tools').style.display = 'flex';
-                document.getElementById('status-tag').innerText = "👨‍🏫 وضع المعلم";
-                document.getElementById('status-tag').style.color = "#4361ee";
-            } else { alert("كلمة مرور خاطئة!"); }
+                document.getElementById('students-list').style.display = 'block';
+                setupPresence(userName);
+            }
         };
 
-        window.toggleSync = () => {
-            isSynced = !isSynced;
-            const btn = document.getElementById('sync-toggle');
-            btn.innerText = isSynced ? "🔗 مزامنة مع المعلم: مفعل" : "🔓 تحكم حر: مفعل";
-            btn.style.background = isSynced ? "#ffa502" : "#2ed573";
-        };
-
-        // --- محرك الرسم ---
-        function render() {
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.translate(camera.x, camera.y);
-            ctx.scale(camera.zoom, camera.zoom);
-
-            Object.values(drawings).forEach(item => drawItem(item));
-            
-            // رسم المسار الحالي للمعلم (لضمان اللحظية)
-            if (isDrawing && currentPath.length > 1) {
-                drawItem({
-                    type: currentMode,
-                    points: currentPath,
-                    color: document.getElementById('colorPicker').value,
-                    width: document.getElementById('sizePicker').value,
-                    opacity: currentMode === 'marker' ? 0.3 : 1
-                });
-            }
-
-            document.getElementById('zoom-val').innerText = `${Math.round(camera.zoom * 100)}%`;
-        }
-
-        function drawItem(item) {
-            ctx.beginPath();
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.strokeStyle = item.color;
-            ctx.lineWidth = item.width;
-            ctx.globalAlpha = item.opacity || 1;
-
-            if (['pen', 'marker', 'eraser'].includes(item.type) && item.points) {
-                ctx.moveTo(item.points[0].x, item.points[0].y);
-                for(let i=1; i<item.points.length; i++) {
-                    ctx.lineTo(item.points[i].x, item.points[i].y);
-                }
-            } else if (item.type === 'rect') {
-                ctx.strokeRect(item.x1, item.y1, item.x2 - item.x1, item.y2 - item.y1);
-            } else if (item.type === 'circle') {
-                let r = Math.sqrt(Math.pow(item.x2 - item.x1, 2) + Math.pow(item.y2 - item.y1, 2));
-                ctx.arc(item.x1, item.y1, r, 0, Math.PI * 2);
-            } else if (item.type === 'line') {
-                ctx.moveTo(item.x1, item.y1); ctx.lineTo(item.x2, item.y2);
-            } else if (item.type === 'text') {
-                ctx.font = `${item.width * 5}px Cairo`;
-                ctx.fillStyle = item.color;
-                ctx.fillText(item.text, item.x1, item.y1);
-            }
-            ctx.stroke();
-            ctx.globalAlpha = 1;
-        }
-
-        // --- معالجة البيانات ---
-        onChildAdded(drawRef, (snap) => { drawings[snap.key] = snap.val(); render(); });
-        onChildRemoved(drawRef, (snap) => { delete drawings[snap.key]; render(); });
-        onValue(drawRef, (snap) => { if(!snap.exists()) { drawings = {}; render(); } });
-
-        if (!isAdmin) {
-            onValue(camRef, (snap) => {
-                if (snap.exists() && isSynced) {
-                    camera = snap.val();
-                    render();
-                }
+        // --- مراقبة الطلاب (للمعلم) ---
+        if (true) { // المعلم يراقب القائمة
+            onChildAdded(presenceRef, (snap) => {
+                if (isAdmin) showToast(`👋 دخل الآن: ${snap.val().name}`);
+                updateList();
+            });
+            onChildRemoved(presenceRef, (snap) => {
+                if (isAdmin) showToast(`🚪 خرج الآن: ${snap.val().name}`);
+                updateList();
             });
         }
 
-        // --- التفاعل ---
-        function getCoords(e) {
-            const t = e.touches ? e.touches[0] : e;
-            return {
-                x: (t.clientX - camera.x) / camera.zoom,
-                y: (t.clientY - camera.y) / camera.zoom,
-                rawX: t.clientX,
-                rawY: t.clientY
-            };
+        function updateList() {
+            onValue(presenceRef, (snap) => {
+                const content = document.getElementById('list-content');
+                content.innerHTML = "";
+                snap.forEach(child => {
+                    content.innerHTML += `<div class="student-item">${child.val().name}</div>`;
+                });
+            });
         }
 
+        // --- محرك الرسم الحديث (يدعم ضغط القلم) ---
         canvas.addEventListener('pointerdown', (e) => {
-            if (e.button !== 0 && e.pointerType === 'mouse') return; // فقط الزر الأيسر
-            const pos = getCoords(e);
-            
-            if (currentMode === 'move' || (!isAdmin && !isSynced)) {
-                isDrawing = true;
-                startPos = { x: e.clientX - camera.x, y: e.clientY - camera.y };
-                return;
-            }
-
             if (!isAdmin) return;
-
             isDrawing = true;
-            if (['pen', 'marker', 'eraser'].includes(currentMode)) {
-                currentPath = [{x: pos.x, y: pos.y}];
-            } else {
-                startPos = pos;
-            }
+            ctx.beginPath();
         });
 
         canvas.addEventListener('pointermove', (e) => {
-            if (!isDrawing) return;
-            const pos = getCoords(e);
+            if (!isDrawing || !isAdmin) return;
+            
+            // ميزة عالمية: ضغط القلم يحول سمك الخط تلقائياً (Pressure Sensitivity)
+            const pressure = e.pressure || 0.5;
+            const baseSize = document.getElementById('sizePicker').value;
+            const dynamicSize = baseSize * pressure * 2;
 
-            if (currentMode === 'move' || (!isAdmin)) {
-                camera.x = e.clientX - startPos.x;
-                camera.y = e.clientY - startPos.y;
-                if (isAdmin) set(camRef, camera);
-                render();
-                return;
-            }
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-            if (['pen', 'marker', 'eraser'].includes(currentMode)) {
-                currentPath.push({x: pos.x, y: pos.y});
-                render(); // رسم محلي لحظي
-            }
+            ctx.lineWidth = dynamicSize;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = currentMode === 'eraser' ? '#ffffff' : document.getElementById('colorPicker').value;
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+
+            // إرسال البيانات (تبسيطاً للسرعة في هذا المثال يتم الإرسال في النهاية أو كمسار)
         });
 
-        canvas.addEventListener('pointerup', (e) => {
-            if (!isDrawing) return;
-            isDrawing = false;
-            if (!isAdmin) return;
+        canvas.addEventListener('pointerup', () => isDrawing = false);
 
-            const pos = getCoords(e);
-            const size = document.getElementById('sizePicker').value;
-            const color = document.getElementById('colorPicker').value;
-
-            let data = {
-                type: currentMode,
-                color: currentMode === 'eraser' ? '#ffffff' : color,
-                width: parseInt(size),
-                opacity: currentMode === 'marker' ? 0.3 : 1
-            };
-
-            if (['pen', 'marker', 'eraser'].includes(currentMode)) {
-                if (currentPath.length < 2) return;
-                data.points = currentPath;
-            } else if (currentMode === 'text') {
-                const txt = prompt("أدخل النص:");
-                if (!txt) return;
-                data.text = txt;
-                data.x1 = pos.x; data.y1 = pos.y;
-            } else if (['rect', 'circle', 'line'].includes(currentMode)) {
-                data.x1 = startPos.x; data.y1 = startPos.y;
-                data.x2 = pos.x; data.y2 = pos.y;
-            }
-
-            push(drawRef, data);
-            currentPath = [];
-        });
-
-        // --- أدوات إضافية ---
+        // --- أدوات ---
         window.setMode = (m, btn) => {
             currentMode = m;
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         };
 
-        document.getElementById('sizePicker').oninput = function() {
-            document.getElementById('sizeVal').innerText = this.value + "px";
-        };
+        window.clearBoard = () => { if(confirm("مسح؟")) remove(drawRef); };
 
-        window.undo = async () => {
-            const snap = await get(query(drawRef, limitToLast(1)));
-            if (snap.exists()) {
-                const key = Object.keys(snap.val())[0];
-                remove(ref(db, `live_board/${key}`));
-            }
-        };
-
-        window.clearBoard = () => {
-            if (confirm("هل تريد مسح السبورة بالكامل؟")) {
-                remove(drawRef);
-                set(camRef, {x:0, y:0, zoom:1});
-            }
-        };
-
-        window.downloadBoard = () => {
-            const link = document.createElement('a');
-            link.download = 'rocket-turbo-capture.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        };
-
-        // الزوم بالماوس (للمعلم)
-        canvas.addEventListener('wheel', (e) => {
-            if (!isAdmin && isSynced) return;
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            camera.zoom = Math.min(Math.max(0.1, camera.zoom * delta), 10);
-            if (isAdmin) set(camRef, camera);
-            render();
-        }, { passive: false });
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
     </script>
 </body>

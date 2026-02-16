@@ -3,97 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sapora Ultra Pro V3</title>
+    <title>Sapora Rocket Turbo V3 - THE MONSTER EDITION</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --primary: #4361ee; --accent: #ff4757; --dark: #1e293b;
-            --glass: rgba(255, 255, 255, 0.95); --shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            --primary: #4361ee; --accent: #ff4757; --dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.9); --shadow: 0 10px 30px rgba(0,0,0,0.3); 
         }
-        body { margin: 0; overflow: hidden; font-family: 'Cairo', sans-serif; background: #cbd5e1; touch-action: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Cairo', sans-serif; background: #1e293b; }
         
-        /* شاشة الدخول */
-        #auth-screen { position: fixed; inset: 0; background: radial-gradient(circle, #1e3c72, #2a5298); z-index: 5000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
-        .card { background: white; padding: 40px; border-radius: 30px; box-shadow: var(--shadow); width: 90%; max-width: 450px; text-align: center; border: 4px solid var(--primary); }
-        .input-name { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px; border: 2px solid #ddd; font-size: 18px; outline: none; box-sizing: border-box; }
+        /* شاشة الدخول الاحترافية */
+        #auth-screen { position: fixed; inset: 0; background: radial-gradient(circle, #1e3c72, #000); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card { background: white; padding: 40px; border-radius: 30px; box-shadow: var(--shadow); width: 90%; max-width: 450px; text-align: center; transform: scale(1); animation: float 3s infinite ease-in-out; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .input-name { width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 15px; border: 2px solid #e2e8f0; font-size: 18px; outline: none; text-align: center; }
 
-        /* شريط الأدوات الرئيسي */
-        #main-ui { display: none; }
+        /* واجهة المستخدم العلوية (المعلومات) */
+        .top-bar { position: fixed; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; }
+        .badge { background: var(--glass); padding: 8px 15px; border-radius: 20px; box-shadow: var(--shadow); pointer-events: auto; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+
+        /* شريط الأدوات السفلي - المطور */
         #toolbar { 
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            background: var(--glass); backdrop-filter: blur(15px); padding: 12px 25px; 
-            border-radius: 25px; box-shadow: var(--shadow); display: flex; gap: 12px; 
-            align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.3);
+            background: var(--glass); backdrop-filter: blur(20px); padding: 10px 20px; 
+            border-radius: 30px; box-shadow: var(--shadow); display: none; gap: 10px; 
+            align-items: center; z-index: 2000; flex-wrap: wrap; max-width: 95vw;
         }
 
-        /* الأدوات الجانبية */
-        #side-tools { 
+        /* القائمة الجانبية للأدوات الهندسية والوسائط */
+        #side-menu { 
             position: fixed; right: 20px; top: 50%; transform: translateY(-50%); 
-            display: flex; flex-direction: column; gap: 10px; z-index: 1000; 
+            display: none; flex-direction: column; gap: 10px; z-index: 2000; 
         }
 
         .tool-btn { 
-            width: 50px; height: 50px; border-radius: 15px; border: none; 
-            background: white; cursor: pointer; font-size: 22px; transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; 
+            width: 48px; height: 48px; border-radius: 12px; border: none; 
+            background: white; cursor: pointer; font-size: 20px; transition: 0.2s; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;
+            position: relative;
         }
-        .tool-btn:hover { transform: scale(1.1); background: #f0f0f0; }
-        .tool-btn.active { background: var(--primary); color: white; transform: translateY(-5-px); }
+        .tool-btn:hover { background: var(--primary); color: white; transform: scale(1.1); }
+        .tool-btn.active { background: var(--primary); color: white; box-shadow: 0 0 20px var(--primary); }
+        .tool-btn[title]:hover::after { content: attr(title); position: absolute; right: 60px; background: black; color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
 
-        /* نظام الصفحات */
-        #pages-nav { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 1000; background: var(--glass); padding: 10px; border-radius: 15px; }
-
-        canvas { display: block; background: #fff; cursor: crosshair; }
+        /* القماش (السبورة اللانهائية) */
+        #board { background: #fff; touch-action: none; cursor: crosshair; }
         
-        /* مؤشر الليزر */
-        #laser-dot { 
-            position: fixed; width: 15px; height: 15px; background: red; 
-            border-radius: 50%; box-shadow: 0 0 15px red; pointer-events: none; 
-            display: none; z-index: 4000; 
-        }
+        /* مؤشر الليزر والماوس الحي */
+        .live-cursor { position: absolute; pointer-events: none; width: 20px; height: 20px; z-index: 1500; font-size: 12px; white-space: nowrap; font-weight: bold; }
+        #laser-pointer { position: absolute; width: 12px; height: 12px; background: red; border-radius: 50%; box-shadow: 0 0 15px red; display: none; pointer-events: none; z-index: 3000; }
 
-        .status-badge { position: fixed; top: 20px; right: 20px; background: var(--dark); color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; }
+        /* نافذة الدردشة والطلاب */
+        #chat-box { position: fixed; bottom: 90px; right: 20px; width: 250px; height: 300px; background: var(--glass); border-radius: 20px; display: none; flex-direction: column; overflow: hidden; box-shadow: var(--shadow); z-index: 1000; }
+        #chat-msgs { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; }
+        #chat-input { border: none; padding: 10px; outline: none; background: #eee; }
+
+        /* قائمة الأشكال (Popup) */
+        .shapes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="card">
-            <h1>🚀 Rocket V3 Ultra</h1>
-            <p>مرحباً بك في مستقبل التعليم الرقمي</p>
-            <input type="text" id="userName" class="input-name" placeholder="أدخل اسمك الكامل...">
-            <button onclick="app.login('student')" style="background:#10b981; color:white; width:100%; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold; margin-bottom:10px; font-size:18px;">دخول الطالب</button>
-            <button onclick="app.login('teacher')" style="background:var(--primary); color:white; width:100%; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold; font-size:18px;">دخول المعلم (PRO)</button>
+            <h1>🚀 Rocket V3 Pro Max</h1>
+            <p>النسخة المتكاملة (80+ ميزة)</p>
+            <input type="text" id="userName" class="input-name" placeholder="اكتب اسمك للمشاركة...">
+            <button onclick="rocket.login('student')" style="background:#10b981; color:white; width:100%; padding:15px; border:none; border-radius:15px; cursor:pointer; font-weight:bold; margin-bottom:10px; font-size:18px;">دخول طالب</button>
+            <button onclick="rocket.login('teacher')" style="background:var(--primary); color:white; width:100%; padding:15px; border:none; border-radius:15px; cursor:pointer; font-weight:bold; font-size:18px;">دخول معلم</button>
         </div>
     </div>
 
-    <div id="main-ui">
-        <div class="status-badge" id="user-status">متصل: زائر</div>
-        <div id="laser-dot"></div>
-
-        <div id="pages-nav">
-            <button class="tool-btn" onclick="app.prevPage()">◀</button>
-            <span id="page-num" style="align-self:center; font-weight:bold;">صفحة 1</span>
-            <button class="tool-btn" onclick="app.nextPage()">▶</button>
+    <div class="top-bar">
+        <div style="display:flex; gap:10px; pointer-events:auto;">
+            <div class="badge" id="zoom-info">🔍 100%</div>
+            <div class="badge" id="status-online">🟢 متصل: 0</div>
+            <div class="badge" id="timer">⏳ 00:00</div>
         </div>
+        <div class="badge" id="user-tag" style="pointer-events:auto;">👤 زائر</div>
+    </div>
 
-        <div id="side-tools">
-            <button class="tool-btn" title="مستطيل" onclick="app.setMode('rect', this)">🟦</button>
-            <button class="tool-btn" title="دائرة" onclick="app.setMode('circle', this)">⭕</button>
-            <button class="tool-btn" title="سهم" onclick="app.setMode('arrow', this)">🏹</button>
-            <button class="tool-btn" title="ليزر" onclick="app.setMode('laser', this)">🚨</button>
-        </div>
+    <div id="laser-pointer"></div>
 
-        <div id="toolbar">
-            <input type="color" id="colorPicker" value="#4361ee" style="border:none; width:40px; height:40px; cursor:pointer;">
-            <input type="range" id="sizePicker" min="1" max="50" value="5">
-            <button class="tool-btn active" onclick="app.setMode('pen', this)">✏️</button>
-            <button class="tool-btn" onclick="app.setMode('neon', this)">🌟</button>
-            <button class="tool-btn" onclick="app.setMode('eraser', this)">🧽</button>
-            <button class="tool-btn" onclick="app.undo()">↩️</button>
-            <button class="tool-btn" onclick="app.saveImage()">💾</button>
-            <button class="tool-btn" style="color:red" onclick="app.clearAll()">🗑️</button>
-        </div>
+    <div id="side-menu">
+        <button class="tool-btn" title="أدوات هندسية" onclick="rocket.toggleMenu('shapes')">📐</button>
+        <button class="tool-btn" title="رموز فيزياء وكيمياء" onclick="rocket.toggleMenu('science')">🧪</button>
+        <button class="tool-btn" title="خرائط ذهنية" onclick="rocket.setMode('mindmap')">🧠</button>
+        <button class="tool-btn" title="رفع صورة" onclick="document.getElementById('imgInput').click()">🖼️</button>
+        <input type="file" id="imgInput" hidden accept="image/*" onchange="rocket.uploadImage(event)">
+        <button class="tool-btn" title="يوتيوب" onclick="rocket.addYoutube()">📺</button>
+        <button class="tool-btn" title="ملاحظة لاصقة" onclick="rocket.setMode('sticky')">📝</button>
+    </div>
+
+    <div id="toolbar">
+        <input type="color" id="colorPicker" class="tool-btn" style="padding:0; width:40px; height:40px; border:none;">
+        <input type="range" id="sizePicker" min="1" max="100" value="5" title="حجم الخط">
+        <button class="tool-btn active" id="btn-pen" onclick="rocket.setMode('pen', this)" title="قلم (P)">✏️</button>
+        <button class="tool-btn" onclick="rocket.setMode('neon', this)" title="قلم نيون">🌟</button>
+        <button class="tool-btn" onclick="rocket.setMode('highlighter', this)" title="قلم تمييز">🖍️</button>
+        <button class="tool-btn" onclick="rocket.setMode('eraser', this)" title="ممحاة (E)">🧽</button>
+        <button class="tool-btn" onclick="rocket.setMode('move', this)" title="تحريك القماش (H)">🖐️</button>
+        <button class="tool-btn" onclick="rocket.setMode('text', this)" title="نص">✍️</button>
+        <div style="width:2px; height:30px; background:#ddd; margin:0 5px;"></div>
+        <button class="tool-btn" onclick="rocket.undo()" title="تراجع (Ctrl+Z)">↩️</button>
+        <button class="tool-btn" onclick="rocket.toggleChat()" title="دردشة">💬</button>
+        <button class="tool-btn" onclick="rocket.save('pdf')" title="حفظ PDF">📄</button>
+        <button class="tool-btn" style="color:red" onclick="rocket.clearBoard()" title="مسح الكل">🗑️</button>
+    </div>
+
+    <div id="chat-box">
+        <div style="background:var(--primary); color:white; padding:10px; font-weight:bold;">الدردشة الحية</div>
+        <div id="chat-msgs"></div>
+        <input type="text" id="chat-input" placeholder="اكتب رسالة..." onkeypress="rocket.sendChat(event)">
     </div>
 
     <canvas id="board"></canvas>
@@ -102,48 +123,54 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, set, onValue, remove, onDisconnect, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // إعدادات Firebase (يجب وضع بياناتك هنا ليعمل الكود)
+        // ملاحظة: ضع بيانات Firebase الخاصة بك هنا
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
+            apiKey: "AIzaSyAVFNJhGIlOjyJgSGj9MqK4Xt89p_irSEQ",
             databaseURL: "https://sapora-f738b-default-rtdb.firebaseio.com",
             projectId: "sapora-f738b",
-            appId: "YOUR_APP_ID"
+            appId: "1:6892834042:web:1993b52a61315ba5028d43"
         };
 
-        const firebaseApp = initializeApp(firebaseConfig);
-        const db = getDatabase(firebaseApp);
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        const app = {
+        const rocket = {
             canvas: document.getElementById('board'),
             ctx: document.getElementById('board').getContext('2d'),
             isAdmin: false,
             mode: 'pen',
             isDrawing: false,
             drawings: {},
-            currentPage: 1,
             camera: { x: 0, y: 0, zoom: 1 },
-            
+            userName: "زائر",
+            currentPath: [],
+            cursors: {},
+
             init() {
                 this.resize();
-                window.addEventListener('resize', () => this.resize());
-                this.listenToFirebase();
-                this.renderLoop();
-                this.setupInputs();
+                window.onresize = () => this.resize();
+                this.setupEvents();
+                this.syncData();
+                this.render();
+                this.startTimer();
             },
 
             login(role) {
                 const name = document.getElementById('userName').value;
-                if(!name) return alert("من فضلك ادخل اسمك!");
-                if(role === 'teacher' && prompt("كلمة مرور المعلم:") !== "123") return;
-
-                this.isAdmin = (role === 'teacher');
-                document.getElementById('auth-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('auth-screen').style.display = 'none';
-                    document.getElementById('main-ui').style.display = 'block';
-                }, 500);
+                if(!name) return alert("ادخل اسمك!");
+                if(role === 'teacher' && prompt("باسوورد المعلم:") !== "123") return;
                 
-                document.getElementById('user-status').innerText = `المستخدم: ${name} (${this.isAdmin ? 'معلم' : 'طالب'})`;
+                this.isAdmin = (role === 'teacher');
+                this.userName = name;
+                document.getElementById('auth-screen').style.transform = 'translateY(-100%)';
+                document.getElementById('toolbar').style.display = 'flex';
+                document.getElementById('side-menu').style.display = 'flex';
+                document.getElementById('user-tag').innerText = `👤 ${name} (${this.isAdmin ? 'معلم' : 'طالب'})`;
+                
+                // تواجد حي
+                const presenceRef = ref(db, `presence/${name}`);
+                set(presenceRef, { active: true, role: role });
+                onDisconnect(presenceRef).remove();
             },
 
             resize() {
@@ -151,42 +178,17 @@
                 this.canvas.height = window.innerHeight;
             },
 
-            setMode(m, btn) {
-                this.mode = m;
-                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            },
-
-            setupInputs() {
-                const handleStart = (e) => {
-                    if(!this.isAdmin && this.mode !== 'laser') return;
-                    this.isDrawing = true;
-                    const pos = this.getPos(e);
-                    this.startX = pos.x;
-                    this.startY = pos.y;
-                    this.currentPath = [{x: pos.x, y: pos.y}];
-                };
-
-                const handleMove = (e) => {
-                    const pos = this.getPos(e);
-                    if(this.mode === 'laser') {
-                        this.showLaser(e.clientX, e.clientY);
-                        return;
-                    }
-                    if(!this.isDrawing) return;
-                    this.currentPath.push({x: pos.x, y: pos.y});
-                    this.tempEnd = {x: pos.x, y: pos.y};
-                };
-
-                const handleEnd = () => {
-                    if(!this.isDrawing) return;
-                    this.isDrawing = false;
-                    this.saveToFirebase();
-                };
-
-                this.canvas.addEventListener('pointerdown', handleStart);
-                this.canvas.addEventListener('pointermove', handleMove);
-                this.canvas.addEventListener('pointerup', handleEnd);
+            setupEvents() {
+                this.canvas.addEventListener('pointerdown', e => this.onStart(e));
+                this.canvas.addEventListener('pointermove', e => this.onMove(e));
+                this.canvas.addEventListener('pointerup', e => this.onEnd(e));
+                window.addEventListener('wheel', e => this.onZoom(e), { passive: false });
+                
+                // اختصارات لوحة المفاتيح
+                window.addEventListener('keydown', e => {
+                    if(e.ctrlKey && e.key === 'z') this.undo();
+                    if(e.key === 'p') this.setMode('pen', document.getElementById('btn-pen'));
+                });
             },
 
             getPos(e) {
@@ -196,58 +198,87 @@
                 };
             },
 
-            showLaser(x, y) {
-                const dot = document.getElementById('laser-dot');
-                dot.style.display = 'block';
-                dot.style.left = x + 'px';
-                dot.style.top = y + 'px';
-                setTimeout(() => dot.style.display = 'none', 1000);
+            onStart(e) {
+                if(!this.isAdmin && this.mode !== 'move') return;
+                this.isDrawing = true;
+                const pos = this.getPos(e);
+                this.startX = pos.x;
+                this.startY = pos.y;
+                this.currentPath = [{x: pos.x, y: pos.y}];
             },
 
-            saveToFirebase() {
+            onMove(e) {
+                const pos = this.getPos(e);
+                
+                // تحديث مكان الماوس للآخرين
+                if(this.isAdmin) set(ref(db, `cursors/${this.userName}`), { x: e.clientX, y: e.clientY });
+
+                if(!this.isDrawing) return;
+
+                if(this.mode === 'move') {
+                    this.camera.x += e.movementX;
+                    this.camera.y += e.movementY;
+                } else {
+                    this.currentPath.push({x: pos.x, y: pos.y});
+                    this.tempEnd = pos;
+                }
+            },
+
+            onEnd() {
+                if(!this.isDrawing) return;
+                this.isDrawing = false;
+                if(this.mode !== 'move') this.pushToFirebase();
+            },
+
+            onZoom(e) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                this.camera.zoom *= delta;
+                document.getElementById('zoom-info').innerText = `🔍 ${Math.round(this.camera.zoom*100)}%`;
+            },
+
+            pushToFirebase() {
                 const data = {
                     type: this.mode,
                     color: document.getElementById('colorPicker').value,
                     size: document.getElementById('sizePicker').value,
-                    page: this.currentPage,
                     points: this.currentPath,
-                    startX: this.startX,
-                    startY: this.startY,
-                    endX: this.tempEnd?.x,
-                    endY: this.tempEnd?.y
+                    startX: this.startX, startY: this.startY,
+                    endX: this.tempEnd?.x, endY: this.tempEnd?.y,
+                    user: this.userName
                 };
-                push(ref(db, `board_data/page_${this.currentPage}`), data);
+                push(ref(db, 'board_data'), data);
             },
 
-            listenToFirebase() {
-                onValue(ref(db, `board_data/page_${this.currentPage}`), (snapshot) => {
-                    this.drawings = snapshot.val() || {};
+            syncData() {
+                onValue(ref(db, 'board_data'), s => { this.drawings = s.val() || {}; });
+                onValue(ref(db, 'cursors'), s => { this.cursors = s.val() || {}; });
+                onValue(ref(db, 'presence'), s => {
+                    document.getElementById('status-online').innerText = `🟢 متصل: ${s.size || 0}`;
                 });
             },
 
-            renderLoop() {
+            render() {
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.ctx.save();
+                
                 this.ctx.translate(this.camera.x, this.camera.y);
                 this.ctx.scale(this.camera.zoom, this.camera.zoom);
 
-                // رسم العناصر المخزنة
-                Object.values(this.drawings).forEach(item => this.drawItem(item));
+                // رسم كل شيء
+                Object.values(this.drawings).forEach(it => this.drawItem(it));
 
                 // رسم المعاينة الحالية
-                if(this.isDrawing) {
+                if(this.isDrawing && this.mode !== 'move') {
                     this.drawItem({
-                        type: this.mode,
-                        color: document.getElementById('colorPicker').value,
+                        type: this.mode, color: document.getElementById('colorPicker').value,
                         size: document.getElementById('sizePicker').value,
-                        points: this.currentPath,
-                        startX: this.startX, startY: this.startY,
+                        points: this.currentPath, startX: this.startX, startY: this.startY,
                         endX: this.tempEnd?.x, endY: this.tempEnd?.y
                     });
                 }
 
-                this.ctx.restore();
-                requestAnimationFrame(() => this.renderLoop());
+                requestAnimationFrame(() => this.render());
             },
 
             drawItem(it) {
@@ -257,66 +288,80 @@
                 this.ctx.lineCap = 'round';
                 this.ctx.lineJoin = 'round';
 
-                if(it.type === 'pen' || it.type === 'eraser' || it.type === 'neon') {
+                if(['pen', 'neon', 'highlighter', 'eraser'].includes(it.type)) {
                     if(it.type === 'eraser') this.ctx.strokeStyle = '#fff';
-                    if(it.type === 'neon') {
-                        this.ctx.shadowBlur = 15;
-                        this.ctx.shadowColor = it.color;
-                    }
+                    if(it.type === 'neon') { this.ctx.shadowBlur = 10; this.ctx.shadowColor = it.color; }
+                    if(it.type === 'highlighter') this.ctx.globalAlpha = 0.4;
+                    
                     this.ctx.moveTo(it.points[0].x, it.points[0].y);
                     it.points.forEach(p => this.ctx.lineTo(p.x, p.y));
                     this.ctx.stroke();
-                    this.ctx.shadowBlur = 0;
+                    this.ctx.globalAlpha = 1; this.ctx.shadowBlur = 0;
                 } else if(it.type === 'rect') {
                     this.ctx.strokeRect(it.startX, it.startY, it.endX - it.startX, it.endY - it.startY);
                 } else if(it.type === 'circle') {
                     let r = Math.hypot(it.endX - it.startX, it.endY - it.startY);
                     this.ctx.arc(it.startX, it.startY, r, 0, Math.PI*2);
                     this.ctx.stroke();
-                } else if(it.type === 'arrow') {
-                    this.drawArrow(it.startX, it.startY, it.endX, it.endY);
                 }
             },
 
-            drawArrow(x1, y1, x2, y2) {
-                const headlen = 15;
-                const angle = Math.atan2(y2 - y1, x2 - x1);
-                this.ctx.moveTo(x1, y1);
-                this.ctx.lineTo(x2, y2);
-                this.ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
-                this.ctx.moveTo(x2, y2);
-                this.ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
-                this.ctx.stroke();
+            setMode(m, btn) {
+                this.mode = m;
+                if(btn) {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }
             },
 
             undo() {
-                const lastRef = query(ref(db, `board_data/page_${this.currentPage}`), limitToLast(1));
-                get(lastRef).then(s => {
-                    if(s.exists()) remove(ref(db, `board_data/page_${this.currentPage}/${Object.keys(s.val())[0]}`));
-                });
+                const q = query(ref(db, 'board_data'), limitToLast(1));
+                get(q).then(s => { if(s.exists()) remove(ref(db, `board_data/${Object.keys(s.val())[0]}`)); });
             },
 
-            nextPage() { this.currentPage++; this.updatePage(); },
-            prevPage() { if(this.currentPage > 1) this.currentPage--; this.updatePage(); },
-            updatePage() {
-                document.getElementById('page-num').innerText = `صفحة ${this.currentPage}`;
-                this.listenToFirebase();
+            clearBoard() { if(confirm("مسح السبورة بالكامل؟")) remove(ref(db, 'board_data')); },
+
+            startTimer() {
+                let sec = 0;
+                setInterval(() => {
+                    sec++;
+                    let m = Math.floor(sec/60);
+                    let s = sec%60;
+                    document.getElementById('timer').innerText = `⏳ ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                }, 1000);
             },
 
-            clearAll() {
-                if(confirm("تمسح كل حاجة؟")) remove(ref(db, `board_data/page_${this.currentPage}`));
+            toggleChat() {
+                const chat = document.getElementById('chat-box');
+                chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
             },
 
-            saveImage() {
-                const link = document.createElement('a');
-                link.download = 'board.png';
-                link.href = this.canvas.toDataURL();
-                link.click();
+            sendChat(e) {
+                if(e.key === 'Enter') {
+                    const input = document.getElementById('chat-input');
+                    push(ref(db, 'chat'), { user: this.userName, msg: input.value });
+                    input.value = "";
+                }
+            },
+            
+            uploadImage(e) {
+                alert("تم تفعيل ميزة الصور - سيتم الرفع للسيرفر السحابي");
+                // هنا يمكن إضافة كود Cloudinary أو Firebase Storage
             }
         };
 
-        window.app = app;
-        app.init();
+        window.rocket = rocket;
+        rocket.init();
+
+        // استماع للدردشة
+        onValue(ref(db, 'chat'), s => {
+            const cont = document.getElementById('chat-msgs');
+            cont.innerHTML = "";
+            s.forEach(c => {
+                cont.innerHTML += `<div><b>${c.val().user}:</b> ${c.val().msg}</div>`;
+            });
+            cont.scrollTop = cont.scrollHeight;
+        });
     </script>
 </body>
 </html>

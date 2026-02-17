@@ -12,71 +12,69 @@
         }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Cairo', sans-serif; background: #e2e8f0; touch-action: none; }
         
-        /* شاشة الدخول */
         #auth-screen { position: fixed; inset: 0; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .card { background: white; padding: 30px; border-radius: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: var(--shadow); }
 
-        /* شريط المعلومات العلوي */
         .top-bar { position: fixed; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 1000; pointer-events: none; }
         .badge { background: var(--glass); padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: bold; pointer-events: auto; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); margin-bottom: 5px; display: inline-flex; align-items: center; gap: 5px; }
 
-        /* شريط الأدوات الذكي */
         #main-toolbar { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
-            background: var(--glass); padding: 10px; border-radius: 20px; 
+            position: fixed; background: var(--glass); padding: 12px; border-radius: 24px; 
             box-shadow: var(--shadow); display: none; gap: 10px; align-items: center; z-index: 2000;
             transition: all 0.3s ease; border: 1px solid #fff;
-            flex-direction: row; flex-wrap: wrap; justify-content: center;
         }
-        .toolbar-vertical { flex-direction: column !important; width: fit-content; height: auto; padding: 15px 10px; }
-        .toolbar-minimized { width: 50px !important; height: 50px !important; overflow: hidden; border-radius: 50% !important; }
+        
+        /* تنسيق القائمة العمودية */
+        .toolbar-vertical { flex-direction: column !important; padding: 15px 10px !important; }
+        .toolbar-vertical #teacher-controls { flex-direction: column !important; }
+        .toolbar-vertical .sub-menu { right: 65px; bottom: auto; }
 
         .tool-btn { 
-            width: 44px; height: 44px; border-radius: 12px; border: none; 
-            background: #f1f5f9; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
+            width: 46px; height: 46px; border-radius: 14px; border: none; 
+            background: #f1f5f9; cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center;
             transition: 0.2s; position: relative; flex-shrink: 0;
         }
-        .tool-btn:hover { background: #e2e8f0; transform: scale(1.1); }
+        .tool-btn:hover { background: #e2e8f0; transform: scale(1.05); }
         .tool-btn.active { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4); }
 
-        /* القوائم الفرعية */
         .sub-menu {
-            position: absolute; bottom: 60px; background: white; padding: 8px; border-radius: 15px;
-            display: none; grid-template-columns: repeat(2, 1fr); gap: 5px; box-shadow: var(--shadow); z-index: 2001;
+            position: absolute; bottom: 65px; background: white; padding: 10px; border-radius: 18px;
+            display: none; grid-template-columns: repeat(2, 1fr); gap: 8px; box-shadow: var(--shadow); z-index: 2001;
         }
-        .toolbar-vertical .sub-menu { bottom: 0; right: 60px; }
         .show-menu { display: grid; }
 
-        .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
 
-        /* الأدوات الهندسية */
+        /* الأدوات الهندسية - تعديل pointer-events */
         .geo-tool {
-            position: absolute; background: rgba(255, 255, 255, 0.6); border: 2px solid var(--primary);
-            backdrop-filter: blur(4px); cursor: move; display: none; z-index: 500; touch-action: none;
+            position: absolute; background: rgba(255, 255, 255, 0.4); border: 2px solid var(--primary);
+            backdrop-filter: blur(2px); cursor: move; display: none; z-index: 500;
         }
+        /* هذه الفئة تُضاف أثناء الرسم لتسمح بالمرور للكانفاس */
+        .drawing-active .geo-tool { pointer-events: none; }
+
         .ruler { height: 60px; width: 400px; background-image: linear-gradient(90deg, #333 2px, transparent 2px); background-size: 20px 30px; background-repeat: repeat-x; background-position: bottom; }
         .protractor { width: 300px; height: 150px; border-radius: 150px 150px 0 0; border-bottom: 3px solid #333; }
-        .triangle { width: 200px; height: 200px; clip-path: polygon(0% 100%, 100% 100%, 0% 0%); background: rgba(200, 230, 255, 0.5); }
+        .triangle { width: 200px; height: 200px; clip-path: polygon(0% 100%, 100% 100%, 0% 0%); background: rgba(67, 97, 238, 0.2); }
         .circle-tool { width: 200px; height: 200px; border-radius: 50%; border: 2px dashed var(--primary); }
 
-        .resizer { position: absolute; right: -5px; bottom: -5px; width: 15px; height: 15px; cursor: nwse-resize; background: var(--primary); border-radius: 50%; }
+        .resizer { position: absolute; right: 0; bottom: 0; width: 20px; height: 20px; cursor: nwse-resize; background: var(--primary); border-radius: 50%; pointer-events: auto !important; }
 
         #board { background: white; cursor: crosshair; display: block; touch-action: none; }
-        
         .footer-rights { position: fixed; bottom: 5px; left: 10px; font-size: 10px; color: #64748b; z-index: 50; }
-        .personal-link { position: fixed; bottom: 5px; right: 10px; z-index: 50; text-decoration: none; font-size: 11px; background: white; padding: 3px 8px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--primary); font-weight: bold; }
+        .personal-link { position: fixed; bottom: 5px; right: 10px; z-index: 50; text-decoration: none; font-size: 11px; background: white; padding: 3px 8px; border-radius: 8px; color: var(--primary); font-weight: bold; }
     </style>
 </head>
-<body>
+<body class="">
 
     <div id="auth-screen">
         <div class="card">
-            <h1 style="color:var(--dark); margin-bottom:5px;">🚀 MONSTER ELITE</h1>
-            <p style="font-size:12px; color:#64748b; margin-bottom:20px;">الجيل الثالث من سبورة الصقورة</p>
-            <input type="text" id="userName" style="width:100%; padding:15px; margin-bottom:15px; border-radius:12px; border:2px solid #f1f5f9; box-sizing: border-box; outline:none;" placeholder="ادخل اسمك للبدء...">
+            <h1>🚀 MONSTER ELITE</h1>
+            <p>الجيل الثالث المطور</p>
+            <input type="text" id="userName" style="width:100%; padding:15px; margin-bottom:15px; border-radius:12px; border:2px solid #f1f5f9; outline:none;" placeholder="ادخل اسمك...">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                <button onclick="rocket.login('student')" style="background:#10b981; color:white; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">دخول كطالب</button>
-                <button onclick="rocket.login('teacher')" style="background:var(--primary); color:white; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">دخول كمعلم</button>
+                <button onclick="rocket.login('student')" style="background:#10b981; color:white; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">طالب</button>
+                <button onclick="rocket.login('teacher')" style="background:var(--primary); color:white; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">معلم</button>
             </div>
         </div>
     </div>
@@ -84,12 +82,12 @@
     <div class="top-bar">
         <div>
             <div class="badge" id="zoom-info">🔍 100%</div>
-            <div class="badge" id="sync-status" onclick="rocket.toggleSync()" style="cursor:pointer; background:#dcfce7">🔄 مزامنة: متصل</div>
+            <div class="badge" id="sync-status" onclick="rocket.toggleSync()" style="cursor:pointer; background:#dcfce7">🔄 متصل</div>
         </div>
         <div>
             <div class="badge" id="timer">⏳ 00:00</div>
             <div class="badge" id="user-tag">👤 زائر</div>
-            <button class="badge" onclick="rocket.toggleFS()" style="cursor:pointer;">📺 ملء الشاشة</button>
+            <button class="badge" onclick="rocket.toggleFS()">📺</button>
         </div>
     </div>
 
@@ -98,16 +96,16 @@
     <div id="tool-triangle" class="geo-tool triangle"><div class="resizer" onmousedown="rocket.startResize(event, 'tool-triangle')"></div></div>
     <div id="tool-circle" class="geo-tool circle-tool"><div class="resizer" onmousedown="rocket.startResize(event, 'tool-circle')"></div></div>
 
-    <div id="main-toolbar">
-        <button class="tool-btn" onclick="rocket.toggleMinimize()" title="تصغير القائمة">📦</button>
+    <div id="main-toolbar" style="bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: row;">
+        <button class="tool-btn" onclick="rocket.toggleMinimize()">📦</button>
         
-        <div id="teacher-controls" style="display:none; align-items:center; gap:8px;">
-            <div style="display:flex; flex-direction:column; gap:3px; background: #eee; padding: 4px; border-radius: 8px;">
-                <div style="display:flex; gap:3px;">
+        <div id="teacher-controls" style="display:none; align-items:center; gap:8px; flex-direction: row;">
+            <div style="display:flex; flex-direction:column; gap:4px; background: #f8fafc; padding: 5px; border-radius: 10px;">
+                <div style="display:flex; gap:4px;">
                     <div class="color-dot" style="background:#000" onclick="rocket.updateColor('#000')"></div>
                     <div class="color-dot" style="background:#f00" onclick="rocket.updateColor('#f00')"></div>
                 </div>
-                <div style="display:flex; gap:3px;">
+                <div style="display:flex; gap:4px;">
                     <div class="color-dot" style="background:#00b7ff" onclick="rocket.updateColor('#00b7ff')"></div>
                     <div class="color-dot" style="background:#2ed573" onclick="rocket.updateColor('#2ed573')"></div>
                 </div>
@@ -135,31 +133,32 @@
 
             <button class="tool-btn" onclick="rocket.setMode('eraser')">🧽</button>
             <button class="tool-btn" onclick="rocket.undo()">↩️</button>
+            <button class="tool-btn" onclick="rocket.redo()">↪️</button>
             <button class="tool-btn" onclick="rocket.clearBoard()" style="color:red">🗑️</button>
             
-            <select onchange="rocket.moveToolbar(this.value)" style="border-radius:8px; padding:2px; font-size:10px; cursor:pointer;">
-                <option value="bottom">👇 أفقي</option>
-                <option value="right">👉 عمودي</option>
+            <select onchange="rocket.moveToolbar(this.value)" style="border-radius:10px; padding:5px; border:1px solid #ddd; font-family:'Cairo'">
+                <option value="bottom">👇 أسفل</option>
+                <option value="top">👆 أعلى</option>
+                <option value="right">👉 يمين</option>
+                <option value="left">👈 يسار</option>
             </select>
         </div>
 
         <button class="tool-btn" onclick="rocket.setMode('move')" id="btn-move">🖐️</button>
 
-        <div style="display:flex; align-items:center; background:#f1f5f9; padding:5px; border-radius:10px; gap:5px;">
-            <button class="tool-btn" style="width:25px; height:25px; font-size:12px;" onclick="rocket.changePage(-1)">◀</button>
-            <span id="page-label" style="font-size:12px; font-weight:bold; min-width:40px; text-align:center;">ص 1</span>
-            <button class="tool-btn" style="width:25px; height:25px; font-size:12px;" onclick="rocket.changePage(1)">▶</button>
+        <div style="display:flex; align-items:center; background:#f1f5f9; padding:5px 10px; border-radius:15px; gap:8px;">
+            <button class="tool-btn" style="width:30px; height:30px; font-size:14px;" onclick="rocket.changePage(-1)">◀</button>
+            <span id="page-label" style="font-weight:bold; min-width:40px; text-align:center;">1</span>
+            <button class="tool-btn" style="width:30px; height:30px; font-size:14px;" onclick="rocket.changePage(1)">▶</button>
         </div>
     </div>
 
-    <div class="footer-rights">جميع الحقوق محفوظة لـ KAREEM OMAR © 2026</div>
-    <a href="https://kemo-omar.github.io/Kareem/" target="_blank" class="personal-link">🔗 KEMO WEB</a>
-
+    <div class="footer-rights">KAREEM OMAR © 2026</div>
     <canvas id="board"></canvas>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAVFNJhGIlOjyJgSGj9MqK4Xt89p_irSEQ",
@@ -176,7 +175,7 @@
             canvas: document.getElementById('board'),
             ctx: document.getElementById('board').getContext('2d'),
             camera: { x: 0, y: 0, zoom: 1 },
-            drawings: {}, currentColor: '#000', currentPage: 1,
+            drawings: {}, redoStack: [], currentColor: '#000', currentPage: 1,
             isDrawing: false, isDragging: false, currentPath: [],
 
             init() {
@@ -191,15 +190,14 @@
 
             login(role) {
                 const name = document.getElementById('userName').value.trim();
-                if(!name) return alert("من فضلك اكتب اسمك");
-                if(role === 'teacher' && prompt("باسوورد المعلم:") !== "123") return;
+                if(!name) return alert("الاسم مطلوب");
+                if(role === 'teacher' && prompt("كلمة السر:") !== "123") return;
                 
                 this.isAdmin = (role === 'teacher');
                 if(this.isAdmin) {
                     document.getElementById('teacher-controls').style.display = 'flex';
                     this.setMode('pen');
                 }
-                
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('main-toolbar').style.display = 'flex';
                 document.getElementById('user-tag').innerText = `👤 ${name}`;
@@ -207,113 +205,94 @@
 
             moveToolbar(pos) {
                 const bar = document.getElementById('main-toolbar');
-                bar.classList.remove('toolbar-vertical');
-                bar.style.left = '50%'; bar.style.bottom = '20px'; bar.style.top = 'auto'; bar.style.right = 'auto';
-                bar.style.transform = 'translateX(-50%)';
-
-                if(pos === 'right') {
-                    bar.classList.add('toolbar-vertical');
-                    bar.style.left = 'auto'; bar.style.right = '20px'; bar.style.top = '50%';
-                    bar.style.transform = 'translateY(-50%)';
-                }
-            },
-
-            toggleMinimize() {
-                document.getElementById('main-toolbar').classList.toggle('toolbar-minimized');
-            },
-
-            toggleSubMenu(id) {
-                const menu = document.getElementById(id);
-                const isShow = menu.classList.contains('show-menu');
-                document.querySelectorAll('.sub-menu').forEach(m => m.classList.remove('show-menu'));
-                if(!isShow) menu.classList.add('show-menu');
-            },
-
-            setMode(m, icon) {
-                this.mode = m;
-                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-                if(m === 'move') {
-                    document.getElementById('btn-move').classList.add('active');
+                bar.className = ""; 
+                bar.style = "position: fixed; display: flex; background: var(--glass); padding: 12px; border-radius: 24px; box-shadow: var(--shadow); z-index: 2000; transition: all 0.3s ease; border: 1px solid #fff;";
+                
+                if(pos === 'bottom' || pos === 'top') {
+                    bar.style.flexDirection = 'row';
+                    bar.style.left = '50%'; bar.style.transform = 'translateX(-50%)';
+                    pos === 'bottom' ? bar.style.bottom = '20px' : bar.style.top = '20px';
                 } else {
-                    document.getElementById('btn-pen').classList.add('active');
-                    if(icon) document.getElementById('btn-pen').innerText = icon;
+                    bar.classList.add('toolbar-vertical');
+                    bar.style.top = '50%'; bar.style.transform = 'translateY(-50%)';
+                    pos === 'right' ? bar.style.right = '20px' : bar.style.left = '20px';
                 }
-                document.querySelectorAll('.sub-menu').forEach(m => m.classList.remove('show-menu'));
             },
 
             setupEvents() {
-                this.canvas.addEventListener('pointerdown', e => {
+                const handleDown = (e) => {
                     const pos = this.getPos(e);
                     if(this.mode === 'move' || !this.isAdmin) {
                         this.isDragging = true;
                         this.lastMouse = { x: e.clientX, y: e.clientY };
                     } else {
                         this.isDrawing = true;
+                        document.body.classList.add('drawing-active'); // للسماح بالرسم فوق الأدوات
                         this.currentPath = [{x: pos.x, y: pos.y}];
                     }
-                });
+                };
 
-                window.addEventListener('pointermove', e => {
+                const handleMove = (e) => {
                     if(this.isDragging) {
-                        this.camera.x += (e.clientX - this.lastMouse.x);
-                        this.camera.y += (e.clientY - this.lastMouse.y);
+                        this.camera.x += e.clientX - this.lastMouse.x;
+                        this.camera.y += e.clientY - this.lastMouse.y;
                         this.lastMouse = { x: e.clientX, y: e.clientY };
                     } else if(this.isDrawing) {
                         const pos = this.getPos(e);
                         this.currentPath.push({x: pos.x, y: pos.y});
                     }
-                });
+                };
 
-                window.addEventListener('pointerup', () => {
-                    if(this.isDrawing && this.currentPath.length > 1) {
+                const handleUp = () => {
+                    if(this.isDrawing) {
                         const pathData = {
                             points: this.currentPath,
                             color: this.mode === 'eraser' ? '#ffffff' : this.currentColor,
                             size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 8 : 3),
                             mode: this.mode,
                             page: this.currentPage,
-                            timestamp: Date.now()
+                            time: Date.now()
                         };
                         push(ref(db, 'board_data'), pathData);
+                        this.redoStack = [];
                     }
-                    this.isDrawing = false;
-                    this.isDragging = false;
-                });
+                    this.isDrawing = this.isDragging = false;
+                    document.body.classList.remove('drawing-active');
+                };
 
-                this.canvas.addEventListener('wheel', e => {
+                this.canvas.addEventListener('pointerdown', handleDown);
+                window.addEventListener('pointermove', handleMove);
+                window.addEventListener('pointerup', handleUp);
+
+                window.addEventListener('wheel', e => {
                     e.preventDefault();
                     const delta = e.deltaY > 0 ? 0.9 : 1.1;
                     this.camera.zoom *= delta;
-                    this.camera.zoom = Math.min(Math.max(0.1, this.camera.zoom), 5);
                     document.getElementById('zoom-info').innerText = `🔍 ${Math.round(this.camera.zoom*100)}%`;
                 }, {passive: false});
             },
 
             getPos(e) {
-                const rect = this.canvas.getBoundingClientRect();
                 return {
-                    x: (e.clientX - rect.left - this.camera.x) / this.camera.zoom,
-                    y: (e.clientY - rect.top - this.camera.y) / this.camera.zoom
+                    x: (e.clientX - this.camera.x) / this.camera.zoom,
+                    y: (e.clientY - this.camera.y) / this.camera.zoom
                 };
             },
 
             syncData() {
                 onValue(ref(db, 'board_data'), s => {
-                    if(this.isSyncing) {
-                        this.drawings = s.val() || {};
-                    }
+                    if(this.isSyncing) this.drawings = s.val() || {};
                 });
             },
 
             render() {
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
                 this.ctx.translate(this.camera.x, this.camera.y);
                 this.ctx.scale(this.camera.zoom, this.camera.zoom);
 
-                const sortedDrawings = Object.values(this.drawings).sort((a,b) => a.timestamp - b.timestamp);
-                sortedDrawings.forEach(draw => {
+                const items = Object.entries(this.drawings).sort((a,b) => a[1].time - b[1].time);
+                items.forEach(([id, draw]) => {
                     if(draw.page === this.currentPage) this.drawPath(draw);
                 });
 
@@ -335,8 +314,8 @@
                 this.ctx.lineJoin = 'round';
                 this.ctx.strokeStyle = draw.color;
                 this.ctx.lineWidth = draw.size;
-                this.ctx.globalAlpha = (draw.mode === 'brush') ? 0.5 : 1.0;
-
+                this.ctx.globalAlpha = draw.mode === 'brush' ? 0.5 : 1;
+                
                 if(draw.mode === 'neon') {
                     this.ctx.shadowBlur = 10;
                     this.ctx.shadowColor = draw.color;
@@ -345,72 +324,87 @@
                 }
 
                 this.ctx.moveTo(draw.points[0].x, draw.points[0].y);
-                for(let i=1; i<draw.points.length; i++) {
-                    this.ctx.lineTo(draw.points[i].x, draw.points[i].y);
-                }
+                draw.points.forEach(p => this.ctx.lineTo(p.x, p.y));
                 this.ctx.stroke();
+                this.ctx.globalAlpha = 1;
                 this.ctx.shadowBlur = 0;
-                this.ctx.globalAlpha = 1.0;
             },
 
             undo() {
                 const keys = Object.keys(this.drawings);
-                if(keys.length > 0) remove(ref(db, `board_data/${keys[keys.length-1]}`));
+                if(keys.length > 0) {
+                    const lastKey = keys[keys.length-1];
+                    this.redoStack.push({key: lastKey, data: this.drawings[lastKey]});
+                    remove(ref(db, `board_data/${lastKey}`));
+                }
             },
 
-            clearBoard() {
-                if(confirm("مسح الصفحة بالكامل؟")) {
-                    Object.keys(this.drawings).forEach(key => {
-                        if(this.drawings[key].page === this.currentPage) remove(ref(db, `board_data/${key}`));
-                    });
+            redo() {
+                if(this.redoStack.length > 0) {
+                    const item = this.redoStack.pop();
+                    set(ref(db, `board_data/${item.key}`), item.data);
                 }
             },
 
             toggleGeo(id) {
                 const el = document.getElementById(id);
-                el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-                el.style.left = '100px'; el.style.top = '100px';
+                el.style.display = el.style.display === 'block' ? 'none' : 'block';
+                el.style.left = '200px'; el.style.top = '200px';
             },
 
             makeDraggable(el) {
                 let px = 0, py = 0;
-                el.addEventListener('pointerdown', e => {
+                el.onpointerdown = (e) => {
                     if(e.target.className === 'resizer') return;
-                    e.stopPropagation();
                     px = e.clientX; py = e.clientY;
-                    const move = ee => {
+                    const move = (ee) => {
                         el.style.left = (el.offsetLeft + (ee.clientX - px)) + "px";
                         el.style.top = (el.offsetTop + (ee.clientY - py)) + "px";
                         px = ee.clientX; py = ee.clientY;
                     };
-                    const up = () => { 
-                        window.removeEventListener('pointermove', move); 
-                        window.removeEventListener('pointerup', up);
-                    };
+                    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
                     window.addEventListener('pointermove', move);
                     window.addEventListener('pointerup', up);
-                });
+                };
             },
 
             startResize(e, id) {
-                e.stopPropagation(); e.preventDefault();
+                e.stopPropagation();
                 const el = document.getElementById(id);
                 let sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
-                const move = ee => {
+                const resize = (ee) => {
                     el.style.width = (sw + (ee.clientX - sx)) + "px";
                     el.style.height = (sh + (ee.clientY - sy)) + "px";
                 };
-                const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-                window.addEventListener('pointermove', move);
-                window.addEventListener('pointerup', up);
+                const stop = () => { window.removeEventListener('pointermove', resize); window.removeEventListener('pointerup', stop); };
+                window.addEventListener('pointermove', resize);
+                window.addEventListener('pointerup', stop);
+            },
+
+            setMode(m, icon) {
+                this.mode = m;
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                if(m === 'move') document.getElementById('btn-move').classList.add('active');
+                else {
+                    document.getElementById('btn-pen').classList.add('active');
+                    if(icon) document.getElementById('btn-pen').innerText = icon;
+                }
+                document.querySelectorAll('.sub-menu').forEach(m => m.classList.remove('show-menu'));
+            },
+
+            toggleSubMenu(id) {
+                const menu = document.getElementById(id);
+                const isShow = menu.classList.contains('show-menu');
+                document.querySelectorAll('.sub-menu').forEach(m => m.classList.remove('show-menu'));
+                if(!isShow) menu.classList.add('show-menu');
             },
 
             resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
-            updateColor(c) { this.currentColor = c; this.setMode('pen'); },
-            changePage(dir) { this.currentPage = Math.max(1, this.currentPage + dir); document.getElementById('page-label').innerText = `ص ${this.currentPage}`; },
+            updateColor(c) { this.currentColor = c; },
+            changePage(dir) { this.currentPage = Math.max(1, this.currentPage + dir); document.getElementById('page-label').innerText = this.currentPage; },
             toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); },
-            toggleSync() { this.isSyncing = !this.isSyncing; document.getElementById('sync-status').style.background = this.isSyncing ? "#dcfce7" : "#fee2e2"; },
-            startTimer() { let s = 0; setInterval(() => { s++; let m = Math.floor(s/60), sec = s%60; document.getElementById('timer').innerText = `⏳ ${m}:${sec.toString().padStart(2,'0')}`; }, 1000); }
+            toggleMinimize() { document.getElementById('main-toolbar').style.display = document.getElementById('main-toolbar').style.display === 'none' ? 'flex' : 'none'; },
+            startTimer() { let s = 0; setInterval(() => { s++; let m = Math.floor(s/60), sc = s%60; document.getElementById('timer').innerText = `⏳ ${m}:${sc.toString().padStart(2,'0')}`; }, 1000); }
         };
 
         window.rocket = rocket;

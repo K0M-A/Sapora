@@ -10,7 +10,7 @@
             --primary: #4361ee; --accent: #ff4757; --dark: #0f172a;
             --glass: rgba(255, 255, 255, 0.98); --shadow: 0 15px 35px rgba(0,0,0,0.2); 
         }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Cairo', sans-serif; background: #e2e8f0; touch-action: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Cairo', sans-serif; background: #e2e8f0; touch-action: none; user-select: none; }
         
         #auth-screen { position: fixed; inset: 0; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .card { background: white; padding: 30px; border-radius: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: var(--shadow); }
@@ -21,10 +21,12 @@
         #main-toolbar { 
             position: fixed; background: var(--glass); padding: 12px; border-radius: 24px; 
             box-shadow: var(--shadow); display: none; gap: 10px; align-items: center; z-index: 2000;
-            transition: all 0.3s ease; border: 1px solid #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #fff;
         }
         
-        /* تنسيق القائمة العمودية */
+        /* زر استعادة القائمة عند الاختفاء */
+        #restore-btn { position: fixed; bottom: 20px; left: 20px; z-index: 3000; display: none; width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; box-shadow: var(--shadow); font-size: 20px; }
+
         .toolbar-vertical { flex-direction: column !important; padding: 15px 10px !important; }
         .toolbar-vertical #teacher-controls { flex-direction: column !important; }
         .toolbar-vertical .sub-menu { right: 65px; bottom: auto; }
@@ -45,12 +47,10 @@
 
         .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
 
-        /* الأدوات الهندسية - تعديل pointer-events */
         .geo-tool {
             position: absolute; background: rgba(255, 255, 255, 0.4); border: 2px solid var(--primary);
-            backdrop-filter: blur(2px); cursor: move; display: none; z-index: 500;
+            backdrop-filter: blur(2px); cursor: move; display: none; z-index: 500; touch-action: none;
         }
-        /* هذه الفئة تُضاف أثناء الرسم لتسمح بالمرور للكانفاس */
         .drawing-active .geo-tool { pointer-events: none; }
 
         .ruler { height: 60px; width: 400px; background-image: linear-gradient(90deg, #333 2px, transparent 2px); background-size: 20px 30px; background-repeat: repeat-x; background-position: bottom; }
@@ -62,15 +62,18 @@
 
         #board { background: white; cursor: crosshair; display: block; touch-action: none; }
         .footer-rights { position: fixed; bottom: 5px; left: 10px; font-size: 10px; color: #64748b; z-index: 50; }
-        .personal-link { position: fixed; bottom: 5px; right: 10px; z-index: 50; text-decoration: none; font-size: 11px; background: white; padding: 3px 8px; border-radius: 8px; color: var(--primary); font-weight: bold; }
+        
+        /* شريط التحكم في السمك */
+        .size-slider-cont { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 5px; border-radius: 10px; gap: 2px; }
+        .size-slider-cont input { writing-mode: bt-lr; -webkit-appearance: slider-vertical; width: 8px; height: 80px; }
     </style>
 </head>
-<body class="">
+<body>
 
     <div id="auth-screen">
         <div class="card">
-            <h1>🚀 MONSTER ELITE</h1>
-            <p>الجيل الثالث المطور</p>
+            <h1>🚀 Sapora</h1>
+            <p>كريم</p>
             <input type="text" id="userName" style="width:100%; padding:15px; margin-bottom:15px; border-radius:12px; border:2px solid #f1f5f9; outline:none;" placeholder="ادخل اسمك...">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <button onclick="rocket.login('student')" style="background:#10b981; color:white; padding:15px; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">طالب</button>
@@ -78,6 +81,8 @@
             </div>
         </div>
     </div>
+
+    <button id="restore-btn" onclick="rocket.toggleMinimize()">🚀</button>
 
     <div class="top-bar">
         <div>
@@ -91,15 +96,15 @@
         </div>
     </div>
 
-    <div id="tool-ruler" class="geo-tool ruler"><div class="resizer" onmousedown="rocket.startResize(event, 'tool-ruler')"></div></div>
-    <div id="tool-protractor" class="geo-tool protractor"><div class="resizer" onmousedown="rocket.startResize(event, 'tool-protractor')"></div></div>
-    <div id="tool-triangle" class="geo-tool triangle"><div class="resizer" onmousedown="rocket.startResize(event, 'tool-triangle')"></div></div>
-    <div id="tool-circle" class="geo-tool circle-tool"><div class="resizer" onmousedown="rocket.startResize(event, 'tool-circle')"></div></div>
+    <div id="tool-ruler" class="geo-tool ruler"><div class="resizer"></div></div>
+    <div id="tool-protractor" class="geo-tool protractor"><div class="resizer"></div></div>
+    <div id="tool-triangle" class="geo-tool triangle"><div class="resizer"></div></div>
+    <div id="tool-circle" class="geo-tool circle-tool"><div class="resizer"></div></div>
 
-    <div id="main-toolbar" style="bottom: 20px; left: 50%; transform: translateX(-50%); display: none; flex-direction: row;">
-        <button class="tool-btn" onclick="rocket.toggleMinimize()">📦</button>
+    <div id="main-toolbar">
+        <button class="tool-btn" onclick="rocket.toggleMinimize()" title="إخفاء">📦</button>
         
-        <div id="teacher-controls" style="display:none; align-items:center; gap:8px; flex-direction: row;">
+        <div id="teacher-controls" style="display:none; align-items:center; gap:8px;">
             <div style="display:flex; flex-direction:column; gap:4px; background: #f8fafc; padding: 5px; border-radius: 10px;">
                 <div style="display:flex; gap:4px;">
                     <div class="color-dot" style="background:#000" onclick="rocket.updateColor('#000')"></div>
@@ -109,6 +114,11 @@
                     <div class="color-dot" style="background:#00b7ff" onclick="rocket.updateColor('#00b7ff')"></div>
                     <div class="color-dot" style="background:#2ed573" onclick="rocket.updateColor('#2ed573')"></div>
                 </div>
+            </div>
+
+            <div class="size-slider-cont">
+                <span style="font-size:10px; font-weight:bold;">📏</span>
+                <input type="range" min="1" max="50" value="3" id="pen-size-slider" oninput="rocket.updateLineWidth(this.value)">
             </div>
             
             <div style="position:relative;">
@@ -131,12 +141,12 @@
                 </div>
             </div>
 
-            <button class="tool-btn" onclick="rocket.setMode('eraser')">🧽</button>
-            <button class="tool-btn" onclick="rocket.undo()">↩️</button>
-            <button class="tool-btn" onclick="rocket.redo()">↪️</button>
-            <button class="tool-btn" onclick="rocket.clearBoard()" style="color:red">🗑️</button>
+            <button class="tool-btn" onclick="rocket.setMode('eraser')" title="ممحاة">🧽</button>
+            <button class="tool-btn" onclick="rocket.undo()" title="تراجع">↩️</button>
+            <button class="tool-btn" onclick="rocket.redo()" title="إعادة">↪️</button>
+            <button class="tool-btn" onclick="rocket.clearBoard()" style="color:red" title="مسح الكل">🗑️</button>
             
-            <select onchange="rocket.moveToolbar(this.value)" style="border-radius:10px; padding:5px; border:1px solid #ddd; font-family:'Cairo'">
+            <select onchange="rocket.moveToolbar(this.value)" style="border-radius:10px; padding:5px; border:1px solid #ddd; font-family:'Cairo'; outline:none;">
                 <option value="bottom">👇 أسفل</option>
                 <option value="top">👆 أعلى</option>
                 <option value="right">👉 يمين</option>
@@ -144,7 +154,7 @@
             </select>
         </div>
 
-        <button class="tool-btn" onclick="rocket.setMode('move')" id="btn-move">🖐️</button>
+        <button class="tool-btn" onclick="rocket.setMode('move')" id="btn-move" title="تحريك">🖐️</button>
 
         <div style="display:flex; align-items:center; background:#f1f5f9; padding:5px 10px; border-radius:15px; gap:8px;">
             <button class="tool-btn" style="width:30px; height:30px; font-size:14px;" onclick="rocket.changePage(-1)">◀</button>
@@ -175,7 +185,7 @@
             canvas: document.getElementById('board'),
             ctx: document.getElementById('board').getContext('2d'),
             camera: { x: 0, y: 0, zoom: 1 },
-            drawings: {}, redoStack: [], currentColor: '#000', currentPage: 1,
+            drawings: {}, redoStack: [], currentColor: '#000', currentLineWidth: 3, currentPage: 1,
             isDrawing: false, isDragging: false, currentPath: [],
 
             init() {
@@ -186,6 +196,7 @@
                 this.render();
                 this.startTimer();
                 document.querySelectorAll('.geo-tool').forEach(tool => this.makeDraggable(tool));
+                this.makeResizable();
             },
 
             login(role) {
@@ -221,13 +232,14 @@
 
             setupEvents() {
                 const handleDown = (e) => {
+                    if (e.target.closest('.tool-btn, .sub-menu, .badge, select, input, .geo-tool')) return;
                     const pos = this.getPos(e);
                     if(this.mode === 'move' || !this.isAdmin) {
                         this.isDragging = true;
                         this.lastMouse = { x: e.clientX, y: e.clientY };
                     } else {
                         this.isDrawing = true;
-                        document.body.classList.add('drawing-active'); // للسماح بالرسم فوق الأدوات
+                        document.body.classList.add('drawing-active');
                         this.currentPath = [{x: pos.x, y: pos.y}];
                     }
                 };
@@ -248,7 +260,7 @@
                         const pathData = {
                             points: this.currentPath,
                             color: this.mode === 'eraser' ? '#ffffff' : this.currentColor,
-                            size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 8 : 3),
+                            size: this.currentLineWidth,
                             mode: this.mode,
                             page: this.currentPage,
                             time: Date.now()
@@ -267,15 +279,17 @@
                 window.addEventListener('wheel', e => {
                     e.preventDefault();
                     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-                    this.camera.zoom *= delta;
+                    const oldZoom = this.camera.zoom;
+                    this.camera.zoom = Math.min(Math.max(this.camera.zoom * delta, 0.1), 10);
                     document.getElementById('zoom-info').innerText = `🔍 ${Math.round(this.camera.zoom*100)}%`;
                 }, {passive: false});
             },
 
             getPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
                 return {
-                    x: (e.clientX - this.camera.x) / this.camera.zoom,
-                    y: (e.clientY - this.camera.y) / this.camera.zoom
+                    x: (e.clientX - rect.left - this.camera.x) / this.camera.zoom,
+                    y: (e.clientY - rect.top - this.camera.y) / this.camera.zoom
                 };
             },
 
@@ -300,7 +314,7 @@
                     this.drawPath({
                         points: this.currentPath, 
                         color: this.mode === 'eraser' ? '#ffffff' : this.currentColor, 
-                        size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 8 : 3),
+                        size: this.currentLineWidth,
                         mode: this.mode
                     });
                 }
@@ -317,21 +331,23 @@
                 this.ctx.globalAlpha = draw.mode === 'brush' ? 0.5 : 1;
                 
                 if(draw.mode === 'neon') {
-                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowBlur = 15;
                     this.ctx.shadowColor = draw.color;
                 } else {
                     this.ctx.shadowBlur = 0;
                 }
 
                 this.ctx.moveTo(draw.points[0].x, draw.points[0].y);
-                draw.points.forEach(p => this.ctx.lineTo(p.x, p.y));
+                for(let i = 1; i < draw.points.length; i++){
+                    this.ctx.lineTo(draw.points[i].x, draw.points[i].y);
+                }
                 this.ctx.stroke();
                 this.ctx.globalAlpha = 1;
                 this.ctx.shadowBlur = 0;
             },
 
             undo() {
-                const keys = Object.keys(this.drawings);
+                const keys = Object.keys(this.drawings).filter(k => this.drawings[k].page === this.currentPage);
                 if(keys.length > 0) {
                     const lastKey = keys[keys.length-1];
                     this.redoStack.push({key: lastKey, data: this.drawings[lastKey]});
@@ -346,46 +362,70 @@
                 }
             },
 
+            clearBoard() {
+                if(confirm("هل أنت متأكد من مسح الصفحة الحالية؟")) {
+                    const keys = Object.keys(this.drawings).filter(k => this.drawings[k].page === this.currentPage);
+                    keys.forEach(k => remove(ref(db, `board_data/${k}`)));
+                }
+            },
+
             toggleGeo(id) {
                 const el = document.getElementById(id);
                 el.style.display = el.style.display === 'block' ? 'none' : 'block';
                 el.style.left = '200px'; el.style.top = '200px';
+                document.querySelectorAll('.sub-menu').forEach(m => m.classList.remove('show-menu'));
             },
 
             makeDraggable(el) {
                 let px = 0, py = 0;
                 el.onpointerdown = (e) => {
                     if(e.target.className === 'resizer') return;
+                    e.stopPropagation();
+                    el.setPointerCapture(e.pointerId);
                     px = e.clientX; py = e.clientY;
                     const move = (ee) => {
                         el.style.left = (el.offsetLeft + (ee.clientX - px)) + "px";
                         el.style.top = (el.offsetTop + (ee.clientY - py)) + "px";
                         px = ee.clientX; py = ee.clientY;
                     };
-                    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+                    const up = () => { 
+                        el.releasePointerCapture(e.pointerId);
+                        window.removeEventListener('pointermove', move); 
+                        window.removeEventListener('pointerup', up); 
+                    };
                     window.addEventListener('pointermove', move);
                     window.addEventListener('pointerup', up);
                 };
             },
 
-            startResize(e, id) {
-                e.stopPropagation();
-                const el = document.getElementById(id);
-                let sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
-                const resize = (ee) => {
-                    el.style.width = (sw + (ee.clientX - sx)) + "px";
-                    el.style.height = (sh + (ee.clientY - sy)) + "px";
-                };
-                const stop = () => { window.removeEventListener('pointermove', resize); window.removeEventListener('pointerup', stop); };
-                window.addEventListener('pointermove', resize);
-                window.addEventListener('pointerup', stop);
+            makeResizable() {
+                document.querySelectorAll('.resizer').forEach(resizer => {
+                    resizer.onpointerdown = (e) => {
+                        e.stopPropagation();
+                        const el = resizer.parentElement;
+                        el.setPointerCapture(e.pointerId);
+                        let sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
+                        const resize = (ee) => {
+                            el.style.width = (sw + (ee.clientX - sx)) + "px";
+                            el.style.height = (sh + (ee.clientY - sy)) + "px";
+                        };
+                        const stop = () => { 
+                            el.releasePointerCapture(e.pointerId);
+                            window.removeEventListener('pointermove', resize); 
+                            window.removeEventListener('pointerup', stop); 
+                        };
+                        window.addEventListener('pointermove', resize);
+                        window.addEventListener('pointerup', stop);
+                    };
+                });
             },
 
             setMode(m, icon) {
                 this.mode = m;
                 document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-                if(m === 'move') document.getElementById('btn-move').classList.add('active');
-                else {
+                if(m === 'move') {
+                    document.getElementById('btn-move').classList.add('active');
+                } else {
                     document.getElementById('btn-pen').classList.add('active');
                     if(icon) document.getElementById('btn-pen').innerText = icon;
                 }
@@ -401,10 +441,30 @@
 
             resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
             updateColor(c) { this.currentColor = c; },
+            updateLineWidth(v) { this.currentLineWidth = parseInt(v); },
             changePage(dir) { this.currentPage = Math.max(1, this.currentPage + dir); document.getElementById('page-label').innerText = this.currentPage; },
             toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); },
-            toggleMinimize() { document.getElementById('main-toolbar').style.display = document.getElementById('main-toolbar').style.display === 'none' ? 'flex' : 'none'; },
-            startTimer() { let s = 0; setInterval(() => { s++; let m = Math.floor(s/60), sc = s%60; document.getElementById('timer').innerText = `⏳ ${m}:${sc.toString().padStart(2,'0')}`; }, 1000); }
+            
+            toggleMinimize() { 
+                const bar = document.getElementById('main-toolbar');
+                const rest = document.getElementById('restore-btn');
+                if(bar.style.display === 'none') {
+                    bar.style.display = 'flex';
+                    rest.style.display = 'none';
+                } else {
+                    bar.style.display = 'none';
+                    rest.style.display = 'block';
+                }
+            },
+            
+            startTimer() { 
+                let s = 0; 
+                setInterval(() => { 
+                    s++; 
+                    let m = Math.floor(s/60), sc = s%60; 
+                    document.getElementById('timer').innerText = `⏳ ${m}:${sc.toString().padStart(2,'0')}`; 
+                }, 1000); 
+            }
         };
 
         window.rocket = rocket;

@@ -10,7 +10,7 @@
             --primary: #4361ee; --accent: #ff4757; --dark: #0f172a;
             --glass: rgba(255, 255, 255, 0.98); --shadow: 0 15px 35px rgba(0,0,0,0.2); 
         }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Cairo', sans-serif; background: #e2e8f0; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Cairo', sans-serif; background: #e2e8f0; touch-action: none; }
         
         /* شاشة الدخول */
         #auth-screen { position: fixed; inset: 0; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
@@ -24,16 +24,17 @@
         #main-toolbar { 
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
             background: var(--glass); padding: 10px; border-radius: 20px; 
-            box-shadow: var(--shadow); display: none; gap: 8px; align-items: center; z-index: 2000;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #fff;
-            flex-direction: row;
+            box-shadow: var(--shadow); display: none; gap: 10px; align-items: center; z-index: 2000;
+            transition: all 0.3s ease; border: 1px solid #fff;
+            flex-direction: row; flex-wrap: wrap; justify-content: center;
         }
+        .toolbar-vertical { flex-direction: column !important; width: fit-content; height: auto; padding: 15px 10px; }
         .toolbar-minimized { width: 50px !important; height: 50px !important; overflow: hidden; border-radius: 50% !important; }
 
         .tool-btn { 
             width: 44px; height: 44px; border-radius: 12px; border: none; 
             background: #f1f5f9; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s; position: relative;
+            transition: 0.2s; position: relative; flex-shrink: 0;
         }
         .tool-btn:hover { background: #e2e8f0; transform: scale(1.1); }
         .tool-btn.active { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4); }
@@ -41,8 +42,9 @@
         /* القوائم الفرعية */
         .sub-menu {
             position: absolute; bottom: 60px; background: white; padding: 8px; border-radius: 15px;
-            display: none; grid-template-columns: repeat(2, 1fr); gap: 5px; box-shadow: var(--shadow);
+            display: none; grid-template-columns: repeat(2, 1fr); gap: 5px; box-shadow: var(--shadow); z-index: 2001;
         }
+        .toolbar-vertical .sub-menu { bottom: 0; right: 60px; }
         .show-menu { display: grid; }
 
         .color-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
@@ -59,7 +61,7 @@
 
         .resizer { position: absolute; right: -5px; bottom: -5px; width: 15px; height: 15px; cursor: nwse-resize; background: var(--primary); border-radius: 50%; }
 
-        #board { background: white; cursor: crosshair; display: block; }
+        #board { background: white; cursor: crosshair; display: block; touch-action: none; }
         
         .footer-rights { position: fixed; bottom: 5px; left: 10px; font-size: 10px; color: #64748b; z-index: 50; }
         .personal-link { position: fixed; bottom: 5px; right: 10px; z-index: 50; text-decoration: none; font-size: 11px; background: white; padding: 3px 8px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--primary); font-weight: bold; }
@@ -100,7 +102,7 @@
         <button class="tool-btn" onclick="rocket.toggleMinimize()" title="تصغير القائمة">📦</button>
         
         <div id="teacher-controls" style="display:none; align-items:center; gap:8px;">
-            <div style="display:flex; flex-direction:column; gap:3px;">
+            <div style="display:flex; flex-direction:column; gap:3px; background: #eee; padding: 4px; border-radius: 8px;">
                 <div style="display:flex; gap:3px;">
                     <div class="color-dot" style="background:#000" onclick="rocket.updateColor('#000')"></div>
                     <div class="color-dot" style="background:#f00" onclick="rocket.updateColor('#f00')"></div>
@@ -133,20 +135,17 @@
 
             <button class="tool-btn" onclick="rocket.setMode('eraser')">🧽</button>
             <button class="tool-btn" onclick="rocket.undo()">↩️</button>
-            <button class="tool-btn" onclick="rocket.redo()">↪️</button>
             <button class="tool-btn" onclick="rocket.clearBoard()" style="color:red">🗑️</button>
             
-            <select onchange="rocket.moveToolbar(this.value)" style="border-radius:8px; padding:2px; font-size:10px;">
-                <option value="bottom">👇 أسفل</option>
-                <option value="top">👆 أعلى</option>
-                <option value="right">👉 يمين</option>
-                <option value="left">👈 يسار</option>
+            <select onchange="rocket.moveToolbar(this.value)" style="border-radius:8px; padding:2px; font-size:10px; cursor:pointer;">
+                <option value="bottom">👇 أفقي</option>
+                <option value="right">👉 عمودي</option>
             </select>
         </div>
 
         <button class="tool-btn" onclick="rocket.setMode('move')" id="btn-move">🖐️</button>
 
-        <div style="display:flex; align-items:center; background:#f1f5f9; padding:2px 8px; border-radius:10px; gap:5px;">
+        <div style="display:flex; align-items:center; background:#f1f5f9; padding:5px; border-radius:10px; gap:5px;">
             <button class="tool-btn" style="width:25px; height:25px; font-size:12px;" onclick="rocket.changePage(-1)">◀</button>
             <span id="page-label" style="font-size:12px; font-weight:bold; min-width:40px; text-align:center;">ص 1</span>
             <button class="tool-btn" style="width:25px; height:25px; font-size:12px;" onclick="rocket.changePage(1)">▶</button>
@@ -160,7 +159,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, query, limitToLast, get, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAVFNJhGIlOjyJgSGj9MqK4Xt89p_irSEQ",
@@ -177,9 +176,8 @@
             canvas: document.getElementById('board'),
             ctx: document.getElementById('board').getContext('2d'),
             camera: { x: 0, y: 0, zoom: 1 },
-            drawings: {}, redoStack: [],
-            currentColor: '#000', currentPage: 1,
-            isDrawing: false,
+            drawings: {}, currentColor: '#000', currentPage: 1,
+            isDrawing: false, isDragging: false, currentPath: [],
 
             init() {
                 this.resize();
@@ -188,8 +186,6 @@
                 this.syncData();
                 this.render();
                 this.startTimer();
-                
-                // تفعيل السحب للأدوات الهندسية
                 document.querySelectorAll('.geo-tool').forEach(tool => this.makeDraggable(tool));
             },
 
@@ -201,9 +197,7 @@
                 this.isAdmin = (role === 'teacher');
                 if(this.isAdmin) {
                     document.getElementById('teacher-controls').style.display = 'flex';
-                    this.mode = 'pen';
-                    document.getElementById('btn-pen').classList.add('active');
-                    document.getElementById('btn-move').classList.remove('active');
+                    this.setMode('pen');
                 }
                 
                 document.getElementById('auth-screen').style.display = 'none';
@@ -211,30 +205,16 @@
                 document.getElementById('user-tag').innerText = `👤 ${name}`;
             },
 
-            toggleSync() {
-                this.isSyncing = !this.isSyncing;
-                const status = document.getElementById('sync-status');
-                status.innerText = this.isSyncing ? "🔄 مزامنة: متصل" : "🚫 مزامنة: متوقفة";
-                status.style.background = this.isSyncing ? "#dcfce7" : "#fee2e2";
-            },
-
             moveToolbar(pos) {
                 const bar = document.getElementById('main-toolbar');
-                const teacher = document.getElementById('teacher-controls');
-                bar.style = ""; bar.className = "";
-                bar.style.position = 'fixed'; bar.style.display = 'flex'; bar.style.background = 'var(--glass)';
-                bar.style.padding = '10px'; bar.style.borderRadius = '20px'; bar.style.zIndex = '2000';
+                bar.classList.remove('toolbar-vertical');
+                bar.style.left = '50%'; bar.style.bottom = '20px'; bar.style.top = 'auto'; bar.style.right = 'auto';
+                bar.style.transform = 'translateX(-50%)';
 
-                if(pos === 'bottom' || pos === 'top') {
-                    bar.style.flexDirection = 'row';
-                    teacher.style.flexDirection = 'row';
-                    bar.style.left = '50%'; bar.style.transform = 'translateX(-50%)';
-                    pos === 'bottom' ? bar.style.bottom = '20px' : bar.style.top = '70px';
-                } else {
-                    bar.style.flexDirection = 'column';
-                    teacher.style.flexDirection = 'column';
-                    bar.style.top = '50%'; bar.style.transform = 'translateY(-50%)';
-                    pos === 'right' ? bar.style.right = '20px' : bar.style.left = '20px';
+                if(pos === 'right') {
+                    bar.classList.add('toolbar-vertical');
+                    bar.style.left = 'auto'; bar.style.right = '20px'; bar.style.top = '50%';
+                    bar.style.transform = 'translateY(-50%)';
                 }
             },
 
@@ -252,75 +232,74 @@
             setMode(m, icon) {
                 this.mode = m;
                 document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-                if(m === 'move') document.getElementById('btn-move').classList.add('active');
-                else {
+                if(m === 'move') {
+                    document.getElementById('btn-move').classList.add('active');
+                } else {
                     document.getElementById('btn-pen').classList.add('active');
                     if(icon) document.getElementById('btn-pen').innerText = icon;
                 }
                 document.querySelectorAll('.sub-menu').forEach(m => m.classList.remove('show-menu'));
             },
 
-            changePage(dir) {
-                this.currentPage = Math.max(1, this.currentPage + dir);
-                document.getElementById('page-label').innerText = `ص ${this.currentPage}`;
-            },
-
-            // --- نظام الرسم المتطور ---
             setupEvents() {
                 this.canvas.addEventListener('pointerdown', e => {
+                    const pos = this.getPos(e);
                     if(this.mode === 'move' || !this.isAdmin) {
                         this.isDragging = true;
+                        this.lastMouse = { x: e.clientX, y: e.clientY };
                     } else {
                         this.isDrawing = true;
-                        const pos = this.getPos(e);
                         this.currentPath = [{x: pos.x, y: pos.y}];
                     }
                 });
 
-                this.canvas.addEventListener('pointermove', e => {
+                window.addEventListener('pointermove', e => {
                     if(this.isDragging) {
-                        this.camera.x += e.movementX;
-                        this.camera.y += e.movementY;
+                        this.camera.x += (e.clientX - this.lastMouse.x);
+                        this.camera.y += (e.clientY - this.lastMouse.y);
+                        this.lastMouse = { x: e.clientX, y: e.clientY };
                     } else if(this.isDrawing) {
                         const pos = this.getPos(e);
                         this.currentPath.push({x: pos.x, y: pos.y});
                     }
                 });
 
-                this.canvas.addEventListener('pointerup', () => {
-                    if(this.isDrawing) {
+                window.addEventListener('pointerup', () => {
+                    if(this.isDrawing && this.currentPath.length > 1) {
                         const pathData = {
                             points: this.currentPath,
                             color: this.mode === 'eraser' ? '#ffffff' : this.currentColor,
-                            size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 6 : 3),
+                            size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 8 : 3),
                             mode: this.mode,
-                            page: this.currentPage
+                            page: this.currentPage,
+                            timestamp: Date.now()
                         };
                         push(ref(db, 'board_data'), pathData);
-                        this.redoStack = [];
                     }
-                    this.isDrawing = this.isDragging = false;
+                    this.isDrawing = false;
+                    this.isDragging = false;
                 });
 
-                window.addEventListener('wheel', e => {
+                this.canvas.addEventListener('wheel', e => {
                     e.preventDefault();
                     const delta = e.deltaY > 0 ? 0.9 : 1.1;
                     this.camera.zoom *= delta;
+                    this.camera.zoom = Math.min(Math.max(0.1, this.camera.zoom), 5);
                     document.getElementById('zoom-info').innerText = `🔍 ${Math.round(this.camera.zoom*100)}%`;
                 }, {passive: false});
             },
 
             getPos(e) {
+                const rect = this.canvas.getBoundingClientRect();
                 return {
-                    x: (e.clientX - this.camera.x) / this.camera.zoom,
-                    y: (e.clientY - this.camera.y) / this.camera.zoom
+                    x: (e.clientX - rect.left - this.camera.x) / this.camera.zoom,
+                    y: (e.clientY - rect.top - this.camera.y) / this.camera.zoom
                 };
             },
 
             syncData() {
-                // استخدام مستمع واحد مستمر لتجنب التعليق
                 onValue(ref(db, 'board_data'), s => {
-                    if(this.isSyncing || this.isAdmin) {
+                    if(this.isSyncing) {
                         this.drawings = s.val() || {};
                     }
                 });
@@ -329,33 +308,34 @@
             render() {
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
                 this.ctx.translate(this.camera.x, this.camera.y);
                 this.ctx.scale(this.camera.zoom, this.camera.zoom);
 
-                // رسم العناصر المخزنة
-                Object.values(this.drawings).forEach(draw => {
+                const sortedDrawings = Object.values(this.drawings).sort((a,b) => a.timestamp - b.timestamp);
+                sortedDrawings.forEach(draw => {
                     if(draw.page === this.currentPage) this.drawPath(draw);
                 });
 
-                // رسم الخط الحالي
                 if(this.isDrawing) {
                     this.drawPath({
                         points: this.currentPath, 
                         color: this.mode === 'eraser' ? '#ffffff' : this.currentColor, 
-                        size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 6 : 3),
+                        size: this.mode === 'marker' ? 10 : (this.mode === 'brush' ? 8 : 3),
                         mode: this.mode
                     });
                 }
-                
                 requestAnimationFrame(() => this.render());
             },
 
             drawPath(draw) {
+                if(!draw.points || draw.points.length < 2) return;
                 this.ctx.beginPath();
                 this.ctx.lineCap = 'round';
                 this.ctx.lineJoin = 'round';
                 this.ctx.strokeStyle = draw.color;
                 this.ctx.lineWidth = draw.size;
+                this.ctx.globalAlpha = (draw.mode === 'brush') ? 0.5 : 1.0;
 
                 if(draw.mode === 'neon') {
                     this.ctx.shadowBlur = 10;
@@ -364,87 +344,73 @@
                     this.ctx.shadowBlur = 0;
                 }
 
-                if(draw.mode === 'brush') this.ctx.globalAlpha = 0.6;
-                else this.ctx.globalAlpha = 1;
-
                 this.ctx.moveTo(draw.points[0].x, draw.points[0].y);
-                draw.points.forEach(p => this.ctx.lineTo(p.x, p.y));
+                for(let i=1; i<draw.points.length; i++) {
+                    this.ctx.lineTo(draw.points[i].x, draw.points[i].y);
+                }
                 this.ctx.stroke();
-            },
-
-            // --- الأدوات الهندسية ---
-            toggleGeo(id) {
-                const el = document.getElementById(id);
-                el.style.display = el.style.display === 'block' ? 'none' : 'block';
-                el.style.left = '200px'; el.style.top = '200px';
-            },
-
-            makeDraggable(el) {
-                let px = 0, py = 0;
-                el.onpointerdown = (e) => {
-                    if(e.target.className === 'resizer') return;
-                    el.setPointerCapture(e.pointerId);
-                    px = e.clientX; py = e.clientY;
-                    el.onpointermove = (e) => {
-                        el.style.left = (el.offsetLeft - (px - e.clientX)) + "px";
-                        el.style.top = (el.offsetTop - (py - e.clientY)) + "px";
-                        px = e.clientX; py = e.clientY;
-                    };
-                };
-                el.onpointerup = () => { el.onpointermove = null; };
-            },
-
-            startResize(e, id) {
-                e.stopPropagation();
-                const el = document.getElementById(id);
-                const startW = el.offsetWidth;
-                const startH = el.offsetHeight;
-                const startX = e.clientX;
-                const startY = e.clientY;
-                
-                const doResize = (ee) => { 
-                    el.style.width = (startW + (ee.clientX - startX)) + "px";
-                    el.style.height = (startH + (ee.clientY - startY)) + "px";
-                };
-                const stop = () => { window.removeEventListener('pointermove', doResize); };
-                window.addEventListener('pointermove', doResize);
-                window.addEventListener('pointerup', stop);
+                this.ctx.shadowBlur = 0;
+                this.ctx.globalAlpha = 1.0;
             },
 
             undo() {
                 const keys = Object.keys(this.drawings);
-                if(keys.length > 0) {
-                    const lastKey = keys[keys.length-1];
-                    this.redoStack.push({key: lastKey, data: this.drawings[lastKey]});
-                    remove(ref(db, `board_data/${lastKey}`));
+                if(keys.length > 0) remove(ref(db, `board_data/${keys[keys.length-1]}`));
+            },
+
+            clearBoard() {
+                if(confirm("مسح الصفحة بالكامل؟")) {
+                    Object.keys(this.drawings).forEach(key => {
+                        if(this.drawings[key].page === this.currentPage) remove(ref(db, `board_data/${key}`));
+                    });
                 }
             },
 
-            redo() {
-                if(this.redoStack.length > 0) {
-                    const item = this.redoStack.pop();
-                    set(ref(db, `board_data/${item.key}`), item.data);
-                }
+            toggleGeo(id) {
+                const el = document.getElementById(id);
+                el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+                el.style.left = '100px'; el.style.top = '100px';
             },
 
-            toggleFS() {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                else document.exitFullscreen();
+            makeDraggable(el) {
+                let px = 0, py = 0;
+                el.addEventListener('pointerdown', e => {
+                    if(e.target.className === 'resizer') return;
+                    e.stopPropagation();
+                    px = e.clientX; py = e.clientY;
+                    const move = ee => {
+                        el.style.left = (el.offsetLeft + (ee.clientX - px)) + "px";
+                        el.style.top = (el.offsetTop + (ee.clientY - py)) + "px";
+                        px = ee.clientX; py = ee.clientY;
+                    };
+                    const up = () => { 
+                        window.removeEventListener('pointermove', move); 
+                        window.removeEventListener('pointerup', up);
+                    };
+                    window.addEventListener('pointermove', move);
+                    window.addEventListener('pointerup', up);
+                });
+            },
+
+            startResize(e, id) {
+                e.stopPropagation(); e.preventDefault();
+                const el = document.getElementById(id);
+                let sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight;
+                const move = ee => {
+                    el.style.width = (sw + (ee.clientX - sx)) + "px";
+                    el.style.height = (sh + (ee.clientY - sy)) + "px";
+                };
+                const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+                window.addEventListener('pointermove', move);
+                window.addEventListener('pointerup', up);
             },
 
             resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
-            updateColor(c) { this.currentColor = c; },
-            clearBoard() { if(confirm("سيتم مسح الصفحة الحالية نهائياً، هل أنت متأكد؟")) {
-                Object.keys(this.drawings).forEach(key => {
-                    if(this.drawings[key].page === this.currentPage) remove(ref(db, `board_data/${key}`));
-                });
-            }},
-            startTimer() {
-                let s = 0; setInterval(() => {
-                    s++; let min = Math.floor(s/60), sec = s%60;
-                    document.getElementById('timer').innerText = `⏳ ${min}:${sec.toString().padStart(2,'0')}`;
-                }, 1000);
-            }
+            updateColor(c) { this.currentColor = c; this.setMode('pen'); },
+            changePage(dir) { this.currentPage = Math.max(1, this.currentPage + dir); document.getElementById('page-label').innerText = `ص ${this.currentPage}`; },
+            toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); },
+            toggleSync() { this.isSyncing = !this.isSyncing; document.getElementById('sync-status').style.background = this.isSyncing ? "#dcfce7" : "#fee2e2"; },
+            startTimer() { let s = 0; setInterval(() => { s++; let m = Math.floor(s/60), sec = s%60; document.getElementById('timer').innerText = `⏳ ${m}:${sec.toString().padStart(2,'0')}`; }, 1000); }
         };
 
         window.rocket = rocket;
